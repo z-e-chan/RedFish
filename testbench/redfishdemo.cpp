@@ -181,6 +181,7 @@ void RedFishDemo::Example4_CreateMixGroups()
     m_mixGroupDrums = mixerSystem->CreateMixGroup();
     m_mixGroupMusic = mixerSystem->CreateMixGroup();
     m_mixGroupSounds = mixerSystem->CreateMixGroup();
+    m_mixGroupTestSendTo = mixerSystem->CreateMixGroup();
     m_mixGroupMaster = mixerSystem->GetMasterMixGroup();
 
     // Use rf::MixGroup::SetOutputMixGroup to route the signal from a mix group through another one.
@@ -407,6 +408,21 @@ void RedFishDemo::Example7_MixGroups()
     {
         if (ImGui::TreeNode("Sends"))
         {
+            if (m_sendTestCreateDestroy)
+            {
+                if (ImGui::Button("Destroy Send"))
+                {
+                    m_mixGroupEntities->DeleteSend(&m_sendTestCreateDestroy);
+                }
+            }
+            else
+            {
+                if (ImGui::Button("Create Send"))
+                {
+                    m_sendTestCreateDestroy = m_mixGroupEntities->CreateSend(m_mixGroupTestSendTo);
+                }
+            }
+
             {
                 float db = m_sendEntitiesToReverb->GetVolumeDb();
                 ImGui::DragFloat("Entities-To-Reverb", &db, 0.01f, -120.0f, 12.0f);
@@ -2294,6 +2310,7 @@ void RedFishDemo::Mixer()
         EditMixGroup("Bass", m_mixGroupBass);
         EditMixGroup("Drums", m_mixGroupDrums);
         EditMixGroup("Music", m_mixGroupMusic);
+        EditMixGroup("Test Send To", m_mixGroupTestSendTo);
         EditMixGroup("Master", m_mixGroupMaster);
     }
 }

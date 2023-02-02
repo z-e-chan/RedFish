@@ -52,6 +52,7 @@ public:
     float GetVolumeDb() const;
     void SetOutputMixGroup(const MixGroup* mixGroup);
     Send* CreateSend(const MixGroup* mixGroup);
+    void DeleteSend(Send** send);
     float GetCurrentAmplitude() const;
 
     template <typename T>

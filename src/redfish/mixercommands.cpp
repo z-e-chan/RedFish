@@ -51,8 +51,19 @@ rf::AudioCommandCallback rf::CreateSendCommand::s_callback = [](AudioTimeline* t
     SummingMixer* mixer = &timeline->m_summingMixer;
     SummingMixer::MixGroupInternal* mixGroup = mixer->MixGroupLookUp(cmd.m_mixGroupHandle);
     mixGroup->m_state.m_priority = cmd.m_priority;
-    mixGroup->m_state.m_sendSlots[cmd.m_mixGroupSlot] = cmd.m_mixGroupSlot;
+    mixGroup->m_state.m_sendSlots[cmd.m_mixGroupSlot] = cmd.m_sendIndex;
     mixer->m_sends[cmd.m_sendIndex].m_sendToMixGroupHandle = cmd.m_sendToMixGroupHandle;
+    mixer->Sort();
+};
+
+rf::AudioCommandCallback rf::DeleteSendCommand::s_callback = [](AudioTimeline* timeline, void* command) {
+    const DeleteSendCommand& cmd = *static_cast<DeleteSendCommand*>(command);
+    SummingMixer* mixer = &timeline->m_summingMixer;
+    SummingMixer::MixGroupInternal* mixGroup = mixer->MixGroupLookUp(cmd.m_mixGroupHandle);
+    mixGroup->m_state.m_priority = cmd.m_priority;
+    mixGroup->m_state.m_sendSlots[cmd.m_mixGroupSlot] = -1;
+    mixer->m_sends[cmd.m_sendIndex] = SummingMixer::SendInternal();
+    mixer->Sort();
 };
 
 rf::AudioCommandCallback rf::SetSendAmplitudeCommand::s_callback = [](AudioTimeline* timeline, void* command) {
