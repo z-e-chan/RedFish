@@ -6,7 +6,9 @@ You can modify the amount of data being allocated using the defines in `src/redf
 
 Additionally, you can provide RedFish with custom a custom allocator and dealloctor if you wish.
 
-RedFish’s mission is to provide an easy to use audio engine that supports a variety of features to enrich your application’s audio experience while being performant enough to support real-time usuage.
+RedFish’s mission is to provide an easy to use audio engine that supports a variety of features to enrich your application’s audio experience while being performant enough to support real-time usage.
+
+RedFish is licensed under the MIT license.
 
 # Requirements
 - At this time, RedFish only support stereo (2 channels) projects and does not support any form of surround sound.
