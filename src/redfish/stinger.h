@@ -1,0 +1,73 @@
+// MIT License
+
+// Copyright (c) 2023 Zach Chan
+
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+#pragma once
+#include "defines.h"
+#include "identifiers.h"
+#include "sync.h"
+
+namespace rf
+{
+class Cue;
+class MixGroup;
+struct StingerParameters;
+
+class Stinger
+{
+public:
+    Stinger(const StingerParameters& stingerParameters, int index);
+    Stinger(const Stinger&) = delete;
+    Stinger(Stinger&&) = delete;
+    Stinger& operator=(const Stinger&) = delete;
+    Stinger& operator=(Stinger&&) = delete;
+    ~Stinger() = default;
+
+    explicit operator bool() const;
+
+    StingerHandle GetStingerHandle() const;
+    CueHandle GetCueHandle() const;
+    const Sync& GetSync() const;
+    float GetGainDb() const;
+    const char* GetName() const;
+
+private:
+    char m_name[RF_MAX_NAME_SIZE];
+    StingerHandle m_stingerHandle;
+    CueHandle m_cueHandle;
+    Sync m_sync;
+    float m_gainDb = 0.0f;
+    int m_index = -1;
+
+    int GetIndex() const;
+
+    friend class MixerSystem;
+    friend class MusicSystem;
+};
+
+struct StingerParameters
+{
+    Sync m_sync;
+    const Cue* m_cue = nullptr;
+    const char* m_name = nullptr;
+    float m_gainDb = 0.0f;
+};
+}  // namespace rf
