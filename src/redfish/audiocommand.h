@@ -28,7 +28,7 @@ namespace rf
 class AudioTimeline;
 
 typedef void (*AudioCommandCallback)(AudioTimeline* timeline, void* command);
-static constexpr int k_audioCommandSize = 64;
+static constexpr int k_audioCommandSize = 80;
 
 struct AudioCommand
 {
@@ -40,7 +40,7 @@ template <class T, typename... Args>
 T& EncodeAudioCommand(AudioCommand* cmd, Args&&... args)
 {
     cmd->m_callback = T::s_callback;
-    static_assert(sizeof(T) <= k_audioCommandSize, "Audio Command is larger than 64 bytes.");
+    static_assert(sizeof(T) <= k_audioCommandSize, "Audio Command is larger than 80 bytes. Increase k_audioCommandSize.");
     return *new (cmd->m_data) T(std::forward<Args>(args)...);
 }
 }  // namespace rf

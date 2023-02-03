@@ -27,7 +27,9 @@
 rf::AudioCommandCallback rf::PlayCommand::s_callback = [](AudioTimeline* timeline, void* command) {
     const PlayCommand& cmd = *static_cast<PlayCommand*>(command);
     const AudioData* data = timeline->GetAudioData(cmd.m_audioDataIndex);
-    timeline->m_voiceSet.CreateVoice(data, cmd, timeline->GetPlayhead() + 1000);
+    const MusicManager& musicManager = timeline->m_musicManager;
+    const long long startTime = musicManager.CalculateStartTime(cmd.m_sync, timeline->GetPlayhead());
+    timeline->m_voiceSet.CreateVoice(data, cmd, startTime);
 };
 
 rf::AudioCommandCallback rf::StopSoundEffectCommand::s_callback = [](AudioTimeline* timeline, void* command) {

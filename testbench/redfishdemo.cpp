@@ -273,6 +273,28 @@ void RedFishDemo::Example6_PlaySoundEffects()
 
             ImGui::TreePop();
         }
+        if (ImGui::TreeNode("Synced Playback (Play some music first!)"))
+        {
+            const auto Demo = [](const char* name, rf::SoundEffect& sound) {
+                ImGui::Text(name);
+                ImGui::PushID(name);
+                ImGui::SameLine();
+                if (ImGui::Button("Play"))
+                {
+                    sound.Play(rf::Sync(rf::Sync::Value::Quarter));
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Stop"))
+                {
+                    sound.Stop();
+                }
+                ImGui::PopID();
+            };
+
+            Demo("Footsteps", m_soundEffectFootsteps);
+
+            ImGui::TreePop();
+        }
         if (ImGui::TreeNode("Fading"))
         {
             ImGui::PushID("SFX Fading");
