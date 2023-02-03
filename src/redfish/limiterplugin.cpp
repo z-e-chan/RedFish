@@ -27,10 +27,15 @@
 #include "plugincommands.h"
 #include "pluginutils.h"
 
-rf::LimiterPlugin::LimiterPlugin(Context* context, CommandProcessor* commands, int pluginIndex, int mixGroupSlot, MixGroupHandle mixGroupHandle)
-    : PluginBase(context, commands, pluginIndex)
+rf::LimiterPlugin::LimiterPlugin(Context* context, CommandProcessor* commands, MixGroupHandle mixGroupHandle, int mixGroupSlot, int pluginIndex)
+    : PluginBase(context, commands, mixGroupHandle, mixGroupSlot, pluginIndex)
 {
     RF_SEND_PLUGIN_CREATE_COMMAND(CreateLimiterDSPCommand);
+}
+
+rf::LimiterPlugin::~LimiterPlugin()
+{
+    RF_SEND_PLUGIN_DESTROY_COMMAND(DestroyLimiterDSPCommand);
 }
 
 void rf::LimiterPlugin::SetThreshold(float threshold)

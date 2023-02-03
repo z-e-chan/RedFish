@@ -42,8 +42,16 @@ static float k_sqrtTwo = 1.41421356237309504880f;
 #define RF_SEND_PLUGIN_CREATE_COMMAND(command)         \
     AudioCommand cmd;                                  \
     command& data = EncodeAudioCommand<command>(&cmd); \
-    data.m_mixGroupHandle = mixGroupHandle;            \
-    data.m_dspIndex = pluginIndex;                     \
-    data.m_mixGroupSlot = mixGroupSlot;                \
+    data.m_mixGroupHandle = m_mixGroupHandle;          \
+    data.m_dspIndex = m_pluginIndex;                   \
+    data.m_mixGroupSlot = m_mixGroupSlot;              \
+    m_commands->Add(cmd);
+
+#define RF_SEND_PLUGIN_DESTROY_COMMAND(command)        \
+    AudioCommand cmd;                                  \
+    command& data = EncodeAudioCommand<command>(&cmd); \
+    data.m_mixGroupHandle = m_mixGroupHandle;          \
+    data.m_dspIndex = m_pluginIndex;                   \
+    data.m_mixGroupSlot = m_mixGroupSlot;              \
     m_commands->Add(cmd);
 }  // namespace rf::PluginUtils

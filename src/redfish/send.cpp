@@ -29,6 +29,7 @@
 rf::Send::Send(CommandProcessor* commands, int sendIndex, MixGroupHandle sendToMixGroupHandle)
     : m_commands(commands)
     , m_sendIndex(sendIndex)
+    , m_sendHandle(CreateSendHandle())
     , m_sendToMixGroupHandle(sendToMixGroupHandle)
 {
 }
@@ -36,6 +37,11 @@ rf::Send::Send(CommandProcessor* commands, int sendIndex, MixGroupHandle sendToM
 rf::Send::operator bool() const
 {
     return static_cast<bool>(m_sendToMixGroupHandle);
+}
+
+rf::SendHandle rf::Send::GetSendHandle() const
+{
+    return m_sendHandle;
 }
 
 void rf::Send::SetVolumeDb(float volumeDb)

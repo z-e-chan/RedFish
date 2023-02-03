@@ -45,6 +45,16 @@
         mixGroup->m_state.m_pluginSlots[cmd.m_mixGroupSlot] = cmd.m_dspIndex;                                        \
     };
 
+#define RF_DESTROY_DSP(dspName)                                                                                       \
+    rf::AudioCommandCallback rf::Destroy##dspName##Command::s_callback = [](AudioTimeline* timeline, void* command) { \
+        const Destroy##dspName##Command& cmd = *static_cast<Destroy##dspName##Command*>(command);                     \
+        SummingMixer* mixer = &timeline->m_summingMixer;                                                              \
+        RF_ASSERT(mixer->m_dsp[cmd.m_dspIndex], "Expected a pointer");                                                \
+        Allocator::Deallocate<DSPBase>(&mixer->m_dsp[cmd.m_dspIndex]);                                                \
+        SummingMixer::MixGroupInternal* mixGroup = mixer->MixGroupLookUp(cmd.m_mixGroupHandle);                       \
+        mixGroup->m_state.m_pluginSlots[cmd.m_mixGroupSlot] = -1;                                                     \
+    };
+
 #define RF_SET_DSP_PARAMETER(dspName, function, parameter)                                                                  \
     rf::AudioCommandCallback rf::Set##dspName##function##Command::s_callback = [](AudioTimeline* timeline, void* command) { \
         const Set##dspName##function##Command& cmd = *static_cast<Set##dspName##function##Command*>(command);               \
@@ -60,35 +70,44 @@ rf::AudioCommandCallback rf::SetDSPBypassCommand::s_callback = [](AudioTimeline*
 };
 
 RF_CREATE_DSP(GainDSP);
+RF_DESTROY_DSP(GainDSP);
 RF_SET_DSP_PARAMETER(GainDSP, Amplitude, m_amplitude);
 
 RF_CREATE_DSP(PanDSP);
+RF_DESTROY_DSP(PanDSP);
 RF_SET_DSP_PARAMETER(PanDSP, Angle, m_angle);
 
 RF_CREATE_DSP(ButterworthHighpassFilterDSP);
+RF_DESTROY_DSP(ButterworthHighpassFilterDSP);
 RF_SET_DSP_PARAMETER(ButterworthHighpassFilterDSP, Order, m_order);
 RF_SET_DSP_PARAMETER(ButterworthHighpassFilterDSP, Cutoff, m_cutoff);
 
 RF_CREATE_DSP(ButterworthLowpassFilterDSP);
+RF_DESTROY_DSP(ButterworthLowpassFilterDSP);
 RF_SET_DSP_PARAMETER(ButterworthLowpassFilterDSP, Order, m_order);
 RF_SET_DSP_PARAMETER(ButterworthLowpassFilterDSP, Cutoff, m_cutoff);
 
 RF_CREATE_DSP(IIR2LowpassFilterDSP);
+RF_DESTROY_DSP(IIR2LowpassFilterDSP);
 RF_SET_DSP_PARAMETER(IIR2LowpassFilterDSP, Q, m_q);
 RF_SET_DSP_PARAMETER(IIR2LowpassFilterDSP, Cutoff, m_cutoff);
 
 RF_CREATE_DSP(IIR2HighpassFilterDSP);
+RF_DESTROY_DSP(IIR2HighpassFilterDSP);
 RF_SET_DSP_PARAMETER(IIR2HighpassFilterDSP, Q, m_q);
 RF_SET_DSP_PARAMETER(IIR2HighpassFilterDSP, Cutoff, m_cutoff);
 
 RF_CREATE_DSP(DelayDSP);
+RF_DESTROY_DSP(DelayDSP);
 RF_SET_DSP_PARAMETER(DelayDSP, Delay, m_delay);
 RF_SET_DSP_PARAMETER(DelayDSP, Feedback, m_feedback);
 
 RF_CREATE_DSP(LimiterDSP);
+RF_DESTROY_DSP(LimiterDSP);
 RF_SET_DSP_PARAMETER(LimiterDSP, Threshold, m_threshold);
 
 RF_CREATE_DSP(CompressorDSP);
+RF_DESTROY_DSP(CompressorDSP);
 RF_SET_DSP_PARAMETER(CompressorDSP, Threshold, m_threshold);
 RF_SET_DSP_PARAMETER(CompressorDSP, Ratio, m_ratio);
 RF_SET_DSP_PARAMETER(CompressorDSP, MakeUpGainAmplitude, m_amplitude);
@@ -96,6 +115,7 @@ RF_SET_DSP_PARAMETER(CompressorDSP, Attack, m_attack);
 RF_SET_DSP_PARAMETER(CompressorDSP, Release, m_release);
 
 RF_CREATE_DSP(ConvolverDSP);
+RF_DESTROY_DSP(ConvolverDSP);
 RF_SET_DSP_PARAMETER(ConvolverDSP, WetPercentage, m_percentage);
 
 rf::AudioCommandCallback rf::LoadConvolverDSPIRCommand::s_callback = [](AudioTimeline* timeline, void* command) {
@@ -120,7 +140,9 @@ rf::AudioCommandCallback rf::SetConvolverDSPIRAmplitudeCommand::s_callback = [](
 };
 
 RF_CREATE_DSP(PositioningDSP);
+RF_DESTROY_DSP(PositioningDSP);
 RF_SET_DSP_PARAMETER(PositioningDSP, PositioningParameters, m_parameters);
 
 #undef RF_CREATE_DSP
+#undef RF_DESTROY_DSP
 #undef RF_SET_DSP_PARAMETER

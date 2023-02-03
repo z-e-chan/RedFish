@@ -58,6 +58,15 @@ struct CreateSendCommand
     static AudioCommandCallback s_callback;
 };
 
+struct DestroySendCommand
+{
+    int m_sendIndex = -1;
+    int m_mixGroupSlot = -1;
+    float m_priority = 0.0f;
+    MixGroupHandle m_mixGroupHandle;
+    static AudioCommandCallback s_callback;
+};
+
 struct SetSendAmplitudeCommand
 {
     int m_sendIndex = -1;

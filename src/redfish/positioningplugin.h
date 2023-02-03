@@ -30,12 +30,12 @@ namespace rf
 class PositioningPlugin : public PluginBase
 {
 public:
-    PositioningPlugin(Context* context, CommandProcessor* commands, int pluginIndex, int mixGroupSlot, MixGroupHandle mixGroupHandle);
+    PositioningPlugin(Context* context, CommandProcessor* commands, MixGroupHandle mixGroupHandle, int mixGroupSlot, int pluginIndex);
     PositioningPlugin(const PositioningPlugin&) = delete;
     PositioningPlugin(PositioningPlugin&&) = delete;
     PositioningPlugin& operator=(const PositioningPlugin&) = delete;
     PositioningPlugin& operator=(PositioningPlugin&&) = delete;
-    ~PositioningPlugin() = default;
+    ~PositioningPlugin();
 
     void SetPositioningParameters(const PositioningParameters& parameters);
     const PositioningParameters& GetPositioningParameters() const;

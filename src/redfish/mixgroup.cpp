@@ -84,7 +84,7 @@ void rf::MixGroup::SetOutputMixGroup(const MixGroup* mixGroup)
 
 rf::Send* rf::MixGroup::CreateSend(const MixGroup* mixGroup)
 {
-    if (!m_mixerSystem->CanCreatePlugin())
+    if (!m_mixerSystem->CanCreateSend())
     {
         RF_FAIL("Too many sends created in project. Increase RF_MAX_MIX_GROUP_SENDS");
         return nullptr;
@@ -115,11 +115,44 @@ rf::Send* rf::MixGroup::CreateSend(const MixGroup* mixGroup)
     data.m_mixGroupSlot = mixGroupSlot;
     data.m_priority = priority;
     data.m_mixGroupHandle = m_mixGroupHandle;
-    data.m_sendToMixGroupHandle = m_mixGroupHandle;
     data.m_sendToMixGroupHandle = sendToHandle;
     m_commands->Add(cmd);
 
     return send;
+}
+
+void rf::MixGroup::DestroySend(Send** send)
+{
+    if (!(*send))
+    {
+        return;
+    }
+
+    const int sendIndex = m_mixerSystem->DestroySend(*send);
+    int mixGroupSlot = -1;
+    MixGroupState& state = m_mixerSystem->GetMixGroupState(m_mixGroupHandle);
+    for (int i = 0; i < RF_MAX_MIX_GROUP_SENDS; ++i)
+    {
+        if (state.m_sendSlots[i] == sendIndex)
+        {
+            mixGroupSlot = i;
+            state.m_sendSlots[i] = -1;
+            break;
+        }
+    }
+
+    const int stateIndex = m_mixerSystem->GetMixGroupIndex(m_mixGroupHandle);
+    const float priority = m_mixerSystem->UpdateMixGroupPriority(stateIndex);
+
+    AudioCommand cmd;
+    DestroySendCommand& data = EncodeAudioCommand<DestroySendCommand>(&cmd);
+    data.m_sendIndex = sendIndex;
+    data.m_mixGroupSlot = mixGroupSlot;
+    data.m_priority = priority;
+    data.m_mixGroupHandle = m_mixGroupHandle;
+    m_commands->Add(cmd);
+
+    *send = nullptr;
 }
 
 float rf::MixGroup::GetCurrentAmplitude() const

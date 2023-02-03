@@ -27,10 +27,15 @@
 #include "plugincommands.h"
 #include "pluginutils.h"
 
-rf::GainPlugin::GainPlugin(Context* context, CommandProcessor* commands, int pluginIndex, int mixGroupSlot, MixGroupHandle mixGroupHandle)
-    : PluginBase(context, commands, pluginIndex)
+rf::GainPlugin::GainPlugin(Context* context, CommandProcessor* commands, MixGroupHandle mixGroupHandle, int mixGroupSlot, int pluginIndex)
+    : PluginBase(context, commands, mixGroupHandle, mixGroupSlot, pluginIndex)
 {
     RF_SEND_PLUGIN_CREATE_COMMAND(CreateGainDSPCommand);
+}
+
+rf::GainPlugin::~GainPlugin()
+{
+    RF_SEND_PLUGIN_DESTROY_COMMAND(DestroyGainDSPCommand);
 }
 
 void rf::GainPlugin::SetGainDb(float gainDb)

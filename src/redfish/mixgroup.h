@@ -52,6 +52,7 @@ public:
     float GetVolumeDb() const;
     void SetOutputMixGroup(const MixGroup* mixGroup);
     Send* CreateSend(const MixGroup* mixGroup);
+    void DestroySend(Send** send);
     float GetCurrentAmplitude() const;
 
     template <typename T>
@@ -83,9 +84,34 @@ public:
         int pluginIndex;
         PluginBase** base = m_mixerSystem->GetPluginBaseForCreation(&pluginIndex);
         state.m_pluginSlots[mixGroupSlot] = pluginIndex;
-        T* gain = Allocator::Allocate<T>(typeid(T).name(), m_context, m_commands, pluginIndex, mixGroupSlot, m_mixGroupHandle);
-        *base = gain;
-        return gain;
+        T* plugin = Allocator::Allocate<T>(typeid(T).name(), m_context, m_commands, m_mixGroupHandle, mixGroupSlot, pluginIndex);
+        *base = plugin;
+        return plugin;
+    }
+
+    template <typename T>
+    void DestroyPlugin(T** plugin)
+    {
+        if (!(*plugin))
+        {
+            return;
+        }
+
+        int pluginIndex;
+        PluginBase** base = m_mixerSystem->GetPluginBaseForDeletion(*plugin, &pluginIndex);
+        Allocator::Deallocate<PluginBase>(base);
+
+        MixGroupState& state = m_mixerSystem->GetMixGroupState(m_mixGroupHandle);
+        for (int i = 0; i < RF_MAX_MIX_GROUP_PLUGINS; ++i)
+        {
+            if (state.m_pluginSlots[i] == pluginIndex)
+            {
+                state.m_pluginSlots[i] = -1;
+                break;
+            }
+        }
+
+        *plugin = nullptr;
     }
 
 private:

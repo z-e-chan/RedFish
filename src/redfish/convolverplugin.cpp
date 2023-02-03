@@ -29,8 +29,8 @@
 #include "plugincommands.h"
 #include "pluginutils.h"
 
-rf::ConvolverPlugin::ConvolverPlugin(Context* context, CommandProcessor* commands, int pluginIndex, int mixGroupSlot, MixGroupHandle mixGroupHandle)
-    : PluginBase(context, commands, pluginIndex)
+rf::ConvolverPlugin::ConvolverPlugin(Context* context, CommandProcessor* commands, MixGroupHandle mixGroupHandle, int mixGroupSlot, int pluginIndex)
+    : PluginBase(context, commands, mixGroupHandle, mixGroupSlot, pluginIndex)
 {
     RF_SEND_PLUGIN_CREATE_COMMAND(CreateConvolverDSPCommand);
 
@@ -44,6 +44,7 @@ rf::ConvolverPlugin::ConvolverPlugin(Context* context, CommandProcessor* command
 rf::ConvolverPlugin::~ConvolverPlugin()
 {
     Allocator::DeallocateArray<float>(&m_amplitudes, PluginUtils::k_maxConvolverIRs);
+    RF_SEND_PLUGIN_DESTROY_COMMAND(DestroyConvolverDSPCommand);
 }
 
 void rf::ConvolverPlugin::LoadIR(const AudioHandle audioHandle, int index)

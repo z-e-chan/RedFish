@@ -46,6 +46,11 @@ struct CreateGainDSPCommand : public CreateCommand
     static AudioCommandCallback s_callback;
 };
 
+struct DestroyGainDSPCommand : public CreateCommand
+{
+    static AudioCommandCallback s_callback;
+};
+
 struct SetGainDSPAmplitudeCommand
 {
     int m_dspIndex = -1;
@@ -58,6 +63,11 @@ struct CreatePanDSPCommand : public CreateCommand
     static AudioCommandCallback s_callback;
 };
 
+struct DestroyPanDSPCommand : public CreateCommand
+{
+    static AudioCommandCallback s_callback;
+};
+
 struct SetPanDSPAngleCommand
 {
     int m_dspIndex = -1;
@@ -66,6 +76,11 @@ struct SetPanDSPAngleCommand
 };
 
 struct CreateButterworthHighpassFilterDSPCommand : public CreateCommand
+{
+    static AudioCommandCallback s_callback;
+};
+
+struct DestroyButterworthHighpassFilterDSPCommand : public CreateCommand
 {
     static AudioCommandCallback s_callback;
 };
@@ -89,6 +104,11 @@ struct CreateButterworthLowpassFilterDSPCommand : public CreateCommand
     static AudioCommandCallback s_callback;
 };
 
+struct DestroyButterworthLowpassFilterDSPCommand : public CreateCommand
+{
+    static AudioCommandCallback s_callback;
+};
+
 struct SetButterworthLowpassFilterDSPOrderCommand
 {
     int m_dspIndex = -1;
@@ -104,6 +124,11 @@ struct SetButterworthLowpassFilterDSPCutoffCommand
 };
 
 struct CreateIIR2HighpassFilterDSPCommand : public CreateCommand
+{
+    static AudioCommandCallback s_callback;
+};
+
+struct DestroyIIR2HighpassFilterDSPCommand : public CreateCommand
 {
     static AudioCommandCallback s_callback;
 };
@@ -127,6 +152,11 @@ struct CreateIIR2LowpassFilterDSPCommand : public CreateCommand
     static AudioCommandCallback s_callback;
 };
 
+struct DestroyIIR2LowpassFilterDSPCommand : public CreateCommand
+{
+    static AudioCommandCallback s_callback;
+};
+
 struct SetIIR2LowpassFilterDSPQCommand
 {
     int m_dspIndex = -1;
@@ -142,6 +172,11 @@ struct SetIIR2LowpassFilterDSPCutoffCommand
 };
 
 struct CreateDelayDSPCommand : public CreateCommand
+{
+    static AudioCommandCallback s_callback;
+};
+
+struct DestroyDelayDSPCommand : public CreateCommand
 {
     static AudioCommandCallback s_callback;
 };
@@ -165,6 +200,11 @@ struct CreateLimiterDSPCommand : public CreateCommand
     static AudioCommandCallback s_callback;
 };
 
+struct DestroyLimiterDSPCommand : public CreateCommand
+{
+    static AudioCommandCallback s_callback;
+};
+
 struct SetLimiterDSPThresholdCommand
 {
     int m_dspIndex = -1;
@@ -173,6 +213,11 @@ struct SetLimiterDSPThresholdCommand
 };
 
 struct CreateCompressorDSPCommand : public CreateCommand
+{
+    static AudioCommandCallback s_callback;
+};
+
+struct DestroyCompressorDSPCommand : public CreateCommand
 {
     static AudioCommandCallback s_callback;
 };
@@ -217,6 +262,11 @@ struct CreateConvolverDSPCommand : public CreateCommand
     static AudioCommandCallback s_callback;
 };
 
+struct DestroyConvolverDSPCommand : public CreateCommand
+{
+    static AudioCommandCallback s_callback;
+};
+
 struct SetConvolverDSPWetPercentageCommand
 {
     int m_dspIndex = -1;
@@ -249,6 +299,11 @@ struct SetConvolverDSPIRAmplitudeCommand
 };
 
 struct CreatePositioningDSPCommand : public CreateCommand
+{
+    static AudioCommandCallback s_callback;
+};
+
+struct DestroyPositioningDSPCommand : public CreateCommand
 {
     static AudioCommandCallback s_callback;
 };

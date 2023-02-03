@@ -29,12 +29,17 @@
 
 rf::PositioningPlugin::PositioningPlugin(Context* context,
                                          CommandProcessor* commands,
-                                         int pluginIndex,
+                                         MixGroupHandle mixGroupHandle,
                                          int mixGroupSlot,
-                                         MixGroupHandle mixGroupHandle)
-    : PluginBase(context, commands, pluginIndex)
+                                         int pluginIndex)
+    : PluginBase(context, commands, mixGroupHandle, mixGroupSlot, pluginIndex)
 {
     RF_SEND_PLUGIN_CREATE_COMMAND(CreatePositioningDSPCommand);
+}
+
+rf::PositioningPlugin::~PositioningPlugin()
+{
+    RF_SEND_PLUGIN_DESTROY_COMMAND(DestroyPositioningDSPCommand);
 }
 
 void rf::PositioningPlugin::SetPositioningParameters(const PositioningParameters& parameters)

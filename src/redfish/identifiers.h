@@ -40,6 +40,8 @@ static constexpr unsigned int InvalidId = 0;
 RF_HANDLE(AudioHandle);
 RF_HANDLE(SoundEffectHandle);
 RF_HANDLE(MixGroupHandle);
+RF_HANDLE(SendHandle);
+RF_HANDLE(PluginHandle);
 RF_HANDLE(CueHandle);
 RF_HANDLE(TransitionHandle);
 RF_HANDLE(StingerHandle);

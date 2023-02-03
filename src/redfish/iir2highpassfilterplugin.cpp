@@ -28,12 +28,17 @@
 
 rf::IIR2HighpassFilterPlugin::IIR2HighpassFilterPlugin(Context* context,
                                                        CommandProcessor* commands,
-                                                       int pluginIndex,
+                                                       MixGroupHandle mixGroupHandle,
                                                        int mixGroupSlot,
-                                                       MixGroupHandle mixGroupHandle)
-    : PluginBase(context, commands, pluginIndex)
+                                                       int pluginIndex)
+    : PluginBase(context, commands, mixGroupHandle, mixGroupSlot, pluginIndex)
 {
     RF_SEND_PLUGIN_CREATE_COMMAND(CreateIIR2HighpassFilterDSPCommand);
+}
+
+rf::IIR2HighpassFilterPlugin::~IIR2HighpassFilterPlugin()
+{
+    RF_SEND_PLUGIN_DESTROY_COMMAND(DestroyIIR2HighpassFilterDSPCommand);
 }
 
 void rf::IIR2HighpassFilterPlugin::SetQ(float q)
