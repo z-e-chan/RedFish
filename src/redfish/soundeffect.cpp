@@ -108,7 +108,7 @@ rf::SoundEffect::~SoundEffect()
     Free();
 }
 
-void rf::SoundEffect::Play()
+void rf::SoundEffect::Play(const rf::Sync sync)
 {
     if (m_context->GetNumPlayingVoices() >= RF_MAX_VOICES)
     {
@@ -131,7 +131,13 @@ void rf::SoundEffect::Play()
     data.m_pitch = m_pitch * variationPitch;
     data.m_amplitude = m_amplitude * variationAmp;
     data.m_positioningParameters = m_positioningParamters;
+    data.m_sync = sync;
     m_commands->Add(cmd);
+}
+
+void rf::SoundEffect::Play()
+{
+    Play(rf::Sync());
 }
 
 void rf::SoundEffect::Stop()
