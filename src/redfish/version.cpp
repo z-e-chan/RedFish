@@ -22,7 +22,7 @@
 
 #include "version.h"
 
-rf::Version rf::g_version = rf::Version(1, 0, 0);
+rf::Version rf::g_version = rf::Version(1, 1, 0);
 
 rf::Version::Version(int major, int minor, int patch)
     : m_major(major)
