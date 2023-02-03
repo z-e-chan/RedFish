@@ -34,6 +34,7 @@ struct PlayCommand
     SoundEffectHandle m_soundEffectHandle;
     MixGroupHandle m_mixGroupHandle;
     PositioningParameters m_positioningParameters;
+    Sync m_sync;
     int m_audioDataIndex = -1;
     int m_playCount = 1;
     float m_amplitude = 1.0f;

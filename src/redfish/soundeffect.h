@@ -64,6 +64,7 @@ public:
         Variation& SetMaxPitch(float pitch);
     };
 
+    void Play(const rf::Sync sync);
     void Play();
     void Stop();
     void Fade(float volumeDb, const Sync& sync, const Sync& duration);
