@@ -29,12 +29,12 @@ namespace rf
 class CompressorPlugin : public PluginBase
 {
 public:
-    CompressorPlugin(Context* context, CommandProcessor* commands, int pluginIndex, int mixGroupSlot, MixGroupHandle mixGroupHandle);
+    CompressorPlugin(Context* context, CommandProcessor* commands, MixGroupHandle mixGroupHandle, int mixGroupSlot, int pluginIndex);
     CompressorPlugin(const CompressorPlugin&) = delete;
     CompressorPlugin(CompressorPlugin&&) = delete;
     CompressorPlugin& operator=(const CompressorPlugin&) = delete;
     CompressorPlugin& operator=(CompressorPlugin&&) = delete;
-    ~CompressorPlugin() = default;
+    ~CompressorPlugin();
 
     void SetThreshold(float threshold);
     float GetThreshold() const;

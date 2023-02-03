@@ -25,11 +25,19 @@
 #include "commandprocessor.h"
 #include "plugincommands.h"
 
-rf::PluginBase::PluginBase(Context* context, CommandProcessor* commands, int pluginIndex)
+rf::PluginBase::PluginBase(Context* context, CommandProcessor* commands, MixGroupHandle mixGroupHandle, int mixGroupSlot, int pluginIndex)
     : m_context(context)
     , m_commands(commands)
+    , m_pluginHandle(CreatePluginHandle())
+    , m_mixGroupHandle(mixGroupHandle)
+    , m_mixGroupSlot(mixGroupSlot)
     , m_pluginIndex(pluginIndex)
 {
+}
+
+rf::PluginHandle rf::PluginBase::GetPluginHandle() const
+{
+    return m_pluginHandle;
 }
 
 void rf::PluginBase::SetBypass(bool bypass)

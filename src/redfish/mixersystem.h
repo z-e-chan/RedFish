@@ -69,9 +69,10 @@ private:
     float UpdateMixGroupPriority(int index);
     bool CanCreateSend() const;
     Send* CreateSend(MixGroupHandle sendToMixGroupHandle, int* outIndex);
-    int DeleteSend(const Send* send);
+    int DestroySend(const Send* send);
     bool CanCreatePlugin() const;
     PluginBase** GetPluginBaseForCreation(int* outIndex);
+    PluginBase** GetPluginBaseForDeletion(const PluginBase* plugin, int* outIndex);
     bool ProcessMessages(const Message& message);
 
     friend class Context;

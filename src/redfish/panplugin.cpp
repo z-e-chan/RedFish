@@ -27,10 +27,15 @@
 #include "plugincommands.h"
 #include "pluginutils.h"
 
-rf::PanPlugin::PanPlugin(Context* context, CommandProcessor* commands, int pluginIndex, int mixGroupSlot, MixGroupHandle mixGroupHandle)
-    : PluginBase(context, commands, pluginIndex)
+rf::PanPlugin::PanPlugin(Context* context, CommandProcessor* commands, MixGroupHandle mixGroupHandle, int mixGroupSlot, int pluginIndex)
+    : PluginBase(context, commands, mixGroupHandle, mixGroupSlot, pluginIndex)
 {
     RF_SEND_PLUGIN_CREATE_COMMAND(CreatePanDSPCommand);
+}
+
+rf::PanPlugin::~PanPlugin()
+{
+    RF_SEND_PLUGIN_DESTROY_COMMAND(DestroyPanDSPCommand);
 }
 
 void rf::PanPlugin::SetAngle(float angle)

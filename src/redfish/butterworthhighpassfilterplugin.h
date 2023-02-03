@@ -30,12 +30,12 @@ namespace rf
 class ButterworthHighpassFilterPlugin : public PluginBase
 {
 public:
-    ButterworthHighpassFilterPlugin(Context* context, CommandProcessor* commands, int pluginIndex, int mixGroupSlot, MixGroupHandle mixGroupHandle);
+    ButterworthHighpassFilterPlugin(Context* context, CommandProcessor* commands, MixGroupHandle mixGroupHandle, int mixGroupSlot, int pluginIndex);
     ButterworthHighpassFilterPlugin(const ButterworthHighpassFilterPlugin&) = delete;
     ButterworthHighpassFilterPlugin(ButterworthHighpassFilterPlugin&&) = delete;
     ButterworthHighpassFilterPlugin& operator=(const ButterworthHighpassFilterPlugin&) = delete;
     ButterworthHighpassFilterPlugin& operator=(ButterworthHighpassFilterPlugin&&) = delete;
-    ~ButterworthHighpassFilterPlugin() = default;
+    ~ButterworthHighpassFilterPlugin();
 
     void SetOrder(int order);
     int GetOrder() const;

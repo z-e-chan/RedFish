@@ -28,12 +28,17 @@
 
 rf::ButterworthHighpassFilterPlugin::ButterworthHighpassFilterPlugin(Context* context,
                                                                      CommandProcessor* commands,
-                                                                     int pluginIndex,
+                                                                     MixGroupHandle mixGroupHandle,
                                                                      int mixGroupSlot,
-                                                                     MixGroupHandle mixGroupHandle)
-    : PluginBase(context, commands, pluginIndex)
+                                                                     int pluginIndex)
+    : PluginBase(context, commands, mixGroupHandle, mixGroupSlot, pluginIndex)
 {
     RF_SEND_PLUGIN_CREATE_COMMAND(CreateButterworthHighpassFilterDSPCommand);
+}
+
+rf::ButterworthHighpassFilterPlugin::~ButterworthHighpassFilterPlugin()
+{
+    RF_SEND_PLUGIN_DESTROY_COMMAND(DestroyButterworthHighpassFilterDSPCommand);
 }
 
 void rf::ButterworthHighpassFilterPlugin::SetOrder(int order)

@@ -29,12 +29,12 @@ namespace rf
 class DelayPlugin : public PluginBase
 {
 public:
-    DelayPlugin(Context* context, CommandProcessor* commands, int pluginIndex, int mixGroupSlot, MixGroupHandle mixGroupHandle);
+    DelayPlugin(Context* context, CommandProcessor* commands, MixGroupHandle mixGroupHandle, int mixGroupSlot, int pluginIndex);
     DelayPlugin(const DelayPlugin&) = delete;
     DelayPlugin(DelayPlugin&&) = delete;
     DelayPlugin& operator=(const DelayPlugin&) = delete;
     DelayPlugin& operator=(DelayPlugin&&) = delete;
-    ~DelayPlugin() = default;
+    ~DelayPlugin();
 
     void SetDelay(float delay);
     float GetDelay() const;

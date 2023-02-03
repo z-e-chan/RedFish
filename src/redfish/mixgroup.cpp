@@ -121,14 +121,14 @@ rf::Send* rf::MixGroup::CreateSend(const MixGroup* mixGroup)
     return send;
 }
 
-void rf::MixGroup::DeleteSend(Send** send)
+void rf::MixGroup::DestroySend(Send** send)
 {
     if (!(*send))
     {
         return;
     }
 
-    const int sendIndex = m_mixerSystem->DeleteSend(*send);
+    const int sendIndex = m_mixerSystem->DestroySend(*send);
     int mixGroupSlot = -1;
     MixGroupState& state = m_mixerSystem->GetMixGroupState(m_mixGroupHandle);
     for (int i = 0; i < RF_MAX_MIX_GROUP_SENDS; ++i)
@@ -145,7 +145,7 @@ void rf::MixGroup::DeleteSend(Send** send)
     const float priority = m_mixerSystem->UpdateMixGroupPriority(stateIndex);
 
     AudioCommand cmd;
-    DeleteSendCommand& data = EncodeAudioCommand<DeleteSendCommand>(&cmd);
+    DestroySendCommand& data = EncodeAudioCommand<DestroySendCommand>(&cmd);
     data.m_sendIndex = sendIndex;
     data.m_mixGroupSlot = mixGroupSlot;
     data.m_priority = priority;

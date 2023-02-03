@@ -56,8 +56,8 @@ rf::AudioCommandCallback rf::CreateSendCommand::s_callback = [](AudioTimeline* t
     mixer->Sort();
 };
 
-rf::AudioCommandCallback rf::DeleteSendCommand::s_callback = [](AudioTimeline* timeline, void* command) {
-    const DeleteSendCommand& cmd = *static_cast<DeleteSendCommand*>(command);
+rf::AudioCommandCallback rf::DestroySendCommand::s_callback = [](AudioTimeline* timeline, void* command) {
+    const DestroySendCommand& cmd = *static_cast<DestroySendCommand*>(command);
     SummingMixer* mixer = &timeline->m_summingMixer;
     SummingMixer::MixGroupInternal* mixGroup = mixer->MixGroupLookUp(cmd.m_mixGroupHandle);
     mixGroup->m_state.m_priority = cmd.m_priority;
