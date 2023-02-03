@@ -69,6 +69,7 @@ private:
     float UpdateMixGroupPriority(int index);
     bool CanCreateSend() const;
     Send* CreateSend(MixGroupHandle sendToMixGroupHandle, int* outIndex);
+    int DeleteSend(const Send* send);
     bool CanCreatePlugin() const;
     PluginBase** GetPluginBaseForCreation(int* outIndex);
     bool ProcessMessages(const Message& message);

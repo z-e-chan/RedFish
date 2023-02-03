@@ -261,6 +261,22 @@ rf::Send* rf::MixerSystem::CreateSend(MixGroupHandle sendToMixGroupHandle, int* 
     return nullptr;
 }
 
+int rf::MixerSystem::DeleteSend(const Send* send)
+{
+    const SendHandle sendHandle = send->GetSendHandle();
+    for (int i = 0; i < RF_MAX_MIX_GROUPS * RF_MAX_MIX_GROUP_SENDS; ++i)
+    {
+        if (m_sends[i].GetSendHandle() == sendHandle)
+        {
+            new (m_sends + i) Send(nullptr, -1, MixGroupHandle());
+            return i;
+        }
+    }
+
+    RF_FAIL("Cannot delete send.");
+    return -1;
+}
+
 bool rf::MixerSystem::CanCreatePlugin() const
 {
     for (int i = 0; i < RF_MAX_MIX_GROUPS * RF_MAX_MIX_GROUP_PLUGINS; ++i)

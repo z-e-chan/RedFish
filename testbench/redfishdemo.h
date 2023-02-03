@@ -98,6 +98,7 @@ private:
     rf::MixGroup* m_mixGroupBass = nullptr;
     rf::MixGroup* m_mixGroupDrums = nullptr;
     rf::MixGroup* m_mixGroupMusic = nullptr;
+    rf::MixGroup* m_mixGroupTestSendTo = nullptr;
     rf::MixGroup* m_mixGroupMaster = nullptr;
 
     rf::SoundEffect m_soundEffectFootsteps;
@@ -105,6 +106,7 @@ private:
 
     rf::Send* m_sendEntitiesToReverb = nullptr;
     rf::Send* m_sendEntitiesToDelay = nullptr;
+    rf::Send* m_sendTestCreateDestroy = nullptr;
 
     rf::GainPlugin* m_gainAmbience = nullptr;
     rf::PanPlugin* m_panAmbience = nullptr;

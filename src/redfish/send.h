@@ -38,6 +38,7 @@ public:
     explicit operator bool() const;
     ~Send() = default;
 
+    SendHandle GetSendHandle() const;
     void SetVolumeDb(float volumeDb);
     float GetVolumeDb() const;
     MixGroupHandle GetSendToMixGroupHandle() const;
@@ -46,6 +47,7 @@ private:
     CommandProcessor* m_commands = nullptr;
     float m_amplitude = 1.0f;
     int m_sendIndex = -1;
+    SendHandle m_sendHandle;
     MixGroupHandle m_sendToMixGroupHandle;
 };
 }  // namespace rf
