@@ -29,12 +29,12 @@ namespace rf
 class PanPlugin : public PluginBase
 {
 public:
-    PanPlugin(Context* context, CommandProcessor* commands, int pluginIndex, int mixGroupSlot, MixGroupHandle mixGroupHandle);
+    PanPlugin(Context* context, CommandProcessor* commands, MixGroupHandle mixGroupHandle, int mixGroupSlot, int pluginIndex);
     PanPlugin(const PanPlugin&) = delete;
     PanPlugin(PanPlugin&&) = delete;
     PanPlugin& operator=(const PanPlugin&) = delete;
     PanPlugin& operator=(PanPlugin&&) = delete;
-    ~PanPlugin() = default;
+    ~PanPlugin();
 
     void SetAngle(float angle);
     float GetAngle() const;

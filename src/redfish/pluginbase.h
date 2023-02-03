@@ -21,6 +21,7 @@
 // SOFTWARE.
 
 #pragma once
+#include "identifiers.h"
 
 namespace rf
 {
@@ -30,19 +31,23 @@ class Context;
 class PluginBase
 {
 public:
-    PluginBase(Context* context, CommandProcessor* commands, int pluginIndex);
+    PluginBase(Context* context, CommandProcessor* commands, MixGroupHandle mixGroupHandle, int mixGroupSlot, int pluginIndex);
     PluginBase(const PluginBase&) = delete;
     PluginBase(PluginBase&&) = delete;
     PluginBase& operator=(const PluginBase&) = delete;
     PluginBase& operator=(PluginBase&&) = delete;
     virtual ~PluginBase() = default;
 
+    PluginHandle GetPluginHandle() const;
     void SetBypass(bool bypass);
     bool GetBypass() const;
 
 protected:
     Context* m_context = nullptr;
     CommandProcessor* m_commands = nullptr;
+    PluginHandle m_pluginHandle;
+    MixGroupHandle m_mixGroupHandle;
+    int m_mixGroupSlot = -1;
     int m_pluginIndex = -1;
     bool m_bypass = false;
 };

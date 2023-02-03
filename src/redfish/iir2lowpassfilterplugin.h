@@ -30,12 +30,12 @@ namespace rf
 class IIR2LowpassFilterPlugin : public PluginBase
 {
 public:
-    IIR2LowpassFilterPlugin(Context* context, CommandProcessor* commands, int pluginIndex, int mixGroupSlot, MixGroupHandle mixGroupHandle);
+    IIR2LowpassFilterPlugin(Context* context, CommandProcessor* commands, MixGroupHandle mixGroupHandle, int mixGroupSlot, int pluginIndex);
     IIR2LowpassFilterPlugin(const IIR2LowpassFilterPlugin&) = delete;
     IIR2LowpassFilterPlugin(IIR2LowpassFilterPlugin&&) = delete;
     IIR2LowpassFilterPlugin& operator=(const IIR2LowpassFilterPlugin&) = delete;
     IIR2LowpassFilterPlugin& operator=(IIR2LowpassFilterPlugin&&) = delete;
-    ~IIR2LowpassFilterPlugin() = default;
+    ~IIR2LowpassFilterPlugin();
 
     void SetQ(float q);
     float GetQ() const;

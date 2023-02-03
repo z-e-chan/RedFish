@@ -29,12 +29,12 @@ namespace rf
 class LimiterPlugin : public PluginBase
 {
 public:
-    LimiterPlugin(Context* context, CommandProcessor* commands, int pluginIndex, int mixGroupSlot, MixGroupHandle mixGroupHandle);
+    LimiterPlugin(Context* context, CommandProcessor* commands, MixGroupHandle mixGroupHandle, int mixGroupSlot, int pluginIndex);
     LimiterPlugin(const LimiterPlugin&) = delete;
     LimiterPlugin(LimiterPlugin&&) = delete;
     LimiterPlugin& operator=(const LimiterPlugin&) = delete;
     LimiterPlugin& operator=(LimiterPlugin&&) = delete;
-    ~LimiterPlugin() = default;
+    ~LimiterPlugin();
 
     void SetThreshold(float threshold);
     float GetThreshold() const;

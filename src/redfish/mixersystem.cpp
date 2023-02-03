@@ -261,7 +261,7 @@ rf::Send* rf::MixerSystem::CreateSend(MixGroupHandle sendToMixGroupHandle, int* 
     return nullptr;
 }
 
-int rf::MixerSystem::DeleteSend(const Send* send)
+int rf::MixerSystem::DestroySend(const Send* send)
 {
     const SendHandle sendHandle = send->GetSendHandle();
     for (int i = 0; i < RF_MAX_MIX_GROUPS * RF_MAX_MIX_GROUP_SENDS; ++i)
@@ -302,6 +302,22 @@ rf::PluginBase** rf::MixerSystem::GetPluginBaseForCreation(int* outIndex)
     }
 
     RF_FAIL("Cannot create plugin. Increase RF_MAX_MIX_GROUP_PLUGINS");
+    return nullptr;
+}
+
+rf::PluginBase** rf::MixerSystem::GetPluginBaseForDeletion(const PluginBase* plugin, int* outIndex)
+{
+    const PluginHandle pluginHandle = plugin->GetPluginHandle();
+    for (int i = 0; i < RF_MAX_MIX_GROUPS * RF_MAX_MIX_GROUP_PLUGINS; ++i)
+    {
+        if (m_plugins[i]->GetPluginHandle() == pluginHandle)
+        {
+            *outIndex = i;
+            return &m_plugins[*outIndex];
+        }
+    }
+
+    RF_FAIL("Cannot delete plugin.");
     return nullptr;
 }
 

@@ -29,7 +29,7 @@ namespace rf
 class ConvolverPlugin : public PluginBase
 {
 public:
-    ConvolverPlugin(Context* context, CommandProcessor* commands, int pluginIndex, int mixGroupSlot, MixGroupHandle mixGroupHandle);
+    ConvolverPlugin(Context* context, CommandProcessor* commands, MixGroupHandle mixGroupHandle, int mixGroupSlot, int pluginIndex);
     ConvolverPlugin(const ConvolverPlugin&) = delete;
     ConvolverPlugin(ConvolverPlugin&&) = delete;
     ConvolverPlugin& operator=(const ConvolverPlugin&) = delete;

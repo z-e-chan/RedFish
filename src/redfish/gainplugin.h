@@ -29,12 +29,12 @@ namespace rf
 class GainPlugin : public PluginBase
 {
 public:
-    GainPlugin(Context* context, CommandProcessor* commands, int pluginIndex, int mixGroupSlot, MixGroupHandle mixGroupHandle);
+    GainPlugin(Context* context, CommandProcessor* commands, MixGroupHandle mixGroupHandle, int mixGroupSlot, int pluginIndex);
     GainPlugin(const GainPlugin&) = delete;
     GainPlugin(GainPlugin&&) = delete;
     GainPlugin& operator=(const GainPlugin&) = delete;
     GainPlugin& operator=(GainPlugin&&) = delete;
-    ~GainPlugin() = default;
+    ~GainPlugin();
 
     void SetGainDb(float gainDb);
     float GetGainDb() const;
