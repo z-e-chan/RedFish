@@ -33,6 +33,7 @@ namespace rf
 class AssetSystem;
 class AudioCallback;
 class AudioTimeline;
+class EventSystem;
 class MixerSystem;
 class MusicSystem;
 struct AudioData;
@@ -51,6 +52,7 @@ public:
     AssetSystem* GetAssetSystem();
     MixerSystem* GetMixerSystem();
     MusicSystem* GetMusicSystem();
+    EventSystem* GetEventSystem();
     const AudioSpec& GetAudioSpec() const;
     int GetNumPlayingVoices() const;
     const std::vector<PlayingSoundInfo>& GetPlayingSoundInfo() const;
@@ -64,6 +66,7 @@ private:
     AssetSystem* m_assetSystem = nullptr;
     MixerSystem* m_mixerSystem = nullptr;
     MusicSystem* m_musicSystem = nullptr;
+    EventSystem* m_eventSystem = nullptr;
     AudioCallback* m_audioCallback = nullptr;
     int m_numPlayingVoices = 0;
 
