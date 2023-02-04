@@ -48,6 +48,13 @@ rf::AssetSystem::~AssetSystem()
 
 rf::AudioHandle rf::AssetSystem::Load(float* interleavedSampleData, int numFrames, int channels, const char* name)
 {
+    const AudioHandle cachedHandle = m_dataCache->AssetExists(name);
+    if (cachedHandle)
+    {
+        m_dataCache->IncrementReferenceCount(cachedHandle);
+        return cachedHandle;
+    }
+
     const int numSamples = numFrames * channels;
     const AudioHandle handle = m_dataCache->AllocateAudioData(interleavedSampleData, name, numSamples, channels);
 
@@ -62,6 +69,13 @@ rf::AudioHandle rf::AssetSystem::Load(float* interleavedSampleData, int numFrame
 
 rf::AudioHandle rf::AssetSystem::Load(const char* path)
 {
+    const AudioHandle cachedHandle = m_dataCache->AssetExists(path);
+    if (cachedHandle)
+    {
+        m_dataCache->IncrementReferenceCount(cachedHandle);
+        return cachedHandle;
+    }
+
     const auto FindLastIndex = [](const char* str, const char find) {
         int index = -1;
         const size_t size = strlen(str);
@@ -99,10 +113,13 @@ rf::AudioHandle rf::AssetSystem::Load(const char* path)
 
 void rf::AssetSystem::Unload(const AudioHandle audioHandle)
 {
-    AudioCommand cmd;
-    UnloadAudioDataCommand& data = EncodeAudioCommand<UnloadAudioDataCommand>(&cmd);
-    data.m_audioHandle = audioHandle;
-    m_commands->Add(cmd);
+    if (m_dataCache->DecrementReferenceCount(audioHandle))
+    {
+        AudioCommand cmd;
+        UnloadAudioDataCommand& data = EncodeAudioCommand<UnloadAudioDataCommand>(&cmd);
+        data.m_audioHandle = audioHandle;
+        m_commands->Add(cmd);
+    }
 }
 
 rf::AudioHandle rf::AssetSystem::LoadWAVFile(const char* path)

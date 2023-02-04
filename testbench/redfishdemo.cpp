@@ -124,6 +124,9 @@ void RedFishDemo::Example3_LoadingAudioAssets()
     m_assetFootstep6 = assetSystem->Load("../testbench/testdata/a2-tile-land-006.wav");
 
     m_assetBirdLoop = assetSystem->Load("../testbench/testdata/bird_loop.wav");
+    const rf::AudioHandle duplicateTest = assetSystem->Load("../testbench/testdata/bird_loop.wav");
+    // Loading an audio file with the same path will return the same audio handle
+    assert(m_assetBirdLoop == duplicateTest);
 
     m_assetIRSmall = assetSystem->Load("../testbench/testdata/ir/reverb_small.wav");
     m_assetIRMedium = assetSystem->Load("../testbench/testdata/ir/reverb_medium.wav");

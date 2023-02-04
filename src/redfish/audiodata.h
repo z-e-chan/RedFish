@@ -38,6 +38,7 @@ struct AudioData
     int m_numSamples = 0;
     int m_numFrames = 0;
     int m_numChannels = 0;
+    int m_referenceCount = 0;
 
     void Allocate(int numChannels, int numFrames, const float* sampleData);
     void Allocate(const AudioData& audioData);
