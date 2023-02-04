@@ -19,6 +19,7 @@ public:
     void Example7_MixGroups();
     void Example8_ViewPlayingSounds();
     void Example9_Music();
+    void Example10_Events();
 
     void StressTest();
     void FuzzTest();
@@ -132,6 +133,7 @@ private:
     float m_fuzzTestWaitTime = 0.0f;
     bool m_runStressTest = false;
     bool m_runFuzzTest = false;
+    bool m_printEventsToConsole = false;
 
     void RunStressTest(float dt);
     void RunFuzzTest(float dt);

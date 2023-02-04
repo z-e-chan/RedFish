@@ -15,6 +15,7 @@ RedFishDemo::RedFishDemo(int bufferSize, int numChannles, int sampleRate, void (
     Example3_LoadingAudioAssets();
     Example4_CreateMixGroups();
     Example5_CreateSoundEffects();
+    Example10_Events();
 }
 
 RedFishDemo::~RedFishDemo()
@@ -53,6 +54,12 @@ void RedFishDemo::OnApplicationUpdate(float dt)
     Mixer();
     StressTest();
     FuzzTest();
+
+    if (ImGui::CollapsingHeader("Events"))
+    {
+        ImGui::Checkbox("Print Events to Console", &m_printEventsToConsole);
+    }
+
     Example8_ViewPlayingSounds();
     ImGui::End();
 
@@ -2273,6 +2280,38 @@ void RedFishDemo::Example9_Music()
             ImGui::TreePop();
         }
     }
+}
+
+void RedFishDemo::Example10_Events()
+{
+    // You can register callbacks which are called when certain RedFish events happen.
+
+    rf::EventSystem* eventSystem = m_context->GetEventSystem();
+    eventSystem->SetUserData(&m_printEventsToConsole);
+
+    eventSystem->RegisterOnBar([](int bar, int beat, void* userData) {
+        const bool printToConsole = *static_cast<bool*>(userData);
+        if (printToConsole)
+        {
+            printf("[EVENT] OnBar: %i, %i\n", bar, beat);
+        }
+    });
+
+    eventSystem->RegisterOnBeat([](int bar, int beat, void* userData) {
+        const bool printToConsole = *static_cast<bool*>(userData);
+        if (printToConsole)
+        {
+            printf("[EVENT] OnBeat: %i, %i\n", bar, beat);
+        }
+    });
+
+    eventSystem->RegisterOnMusicFinished([](void* userData) {
+        const bool printToConsole = *static_cast<bool*>(userData);
+        if (printToConsole)
+        {
+            printf("[EVENT] OnMusicFinished\n");
+        }
+    });
 }
 
 void RedFishDemo::StressTest()

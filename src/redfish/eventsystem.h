@@ -21,26 +21,36 @@
 // SOFTWARE.
 
 #pragma once
-#include "assetsystem.h"
-#include "audiocallback.h"
-#include "butterworthhighpassfilterplugin.h"
-#include "butterworthlowpassfilterplugin.h"
-#include "compressorplugin.h"
-#include "context.h"
-#include "convolverplugin.h"
-#include "cue.h"
-#include "delayplugin.h"
-#include "eventsystem.h"
-#include "gainplugin.h"
-#include "iir2highpassfilterplugin.h"
-#include "iir2lowpassfilterplugin.h"
-#include "limiterplugin.h"
-#include "mixgroup.h"
-#include "musicsystem.h"
-#include "panplugin.h"
-#include "positioningplugin.h"
-#include "send.h"
-#include "soundeffect.h"
-#include "stinger.h"
-#include "transition.h"
-#include "version.h"
+
+namespace rf
+{
+class CommandProcessor;
+struct Message;
+
+class EventSystem
+{
+public:
+    EventSystem(CommandProcessor* commands);
+    EventSystem(const EventSystem&) = delete;
+    EventSystem(EventSystem&&) = delete;
+    EventSystem& operator=(const EventSystem&) = delete;
+    EventSystem& operator=(EventSystem&&) = delete;
+    ~EventSystem() = default;
+
+    void SetUserData(void* userData);
+    void RegisterOnBar(void (*onBar)(int bar, int beat, void* userData));
+    void RegisterOnBeat(void (*onBeat)(int bar, int beat, void* userData));
+    void RegisterOnMusicFinished(void (*onMusicFinished)(void* userData));
+
+private:
+    CommandProcessor* m_commands = nullptr;
+    void* m_userData = nullptr;
+    void (*m_onBar)(int bar, int beat, void* userData) = nullptr;
+    void (*m_onBeat)(int bar, int beat, void* userData) = nullptr;
+    void (*m_onMusicFinished)(void* userData) = nullptr;
+
+    void ProcessMessages(const Message& message);
+
+    friend class Context;
+};
+}  // namespace rf
