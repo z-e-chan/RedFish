@@ -83,6 +83,97 @@ rf::MixGroup* rf::MixerSystem::CreateMixGroup()
     return mixGroup;
 }
 
+void rf::MixerSystem::DestroyMixGroup(MixGroup** mixGroup)
+{
+    if (!(*mixGroup))
+    {
+        return;
+    }
+
+    MixGroup* group = *mixGroup;
+    const MixGroupHandle mixGroupHandle = group->GetMixGroupHandle();
+    
+    // Destroy Sends
+    {
+        const MixGroupState& state = GetMixGroupState(mixGroupHandle);
+        for (int i = 0; i < RF_MAX_MIX_GROUP_SENDS; ++i)
+        {
+            const int sendIndex = state.m_sendSlots[i];
+            if (sendIndex < 0)
+            {
+                continue;
+            }
+
+            Send* send = &m_sends[sendIndex];
+            group->DestroySend(&send);
+        }
+    }
+
+    // Destroy Plug-ins
+    {
+        const MixGroupState& state = GetMixGroupState(mixGroupHandle);
+        for (int i = 0; i < RF_MAX_MIX_GROUP_PLUGINS; ++i)
+        {
+            const int pluginIndex = state.m_pluginSlots[i];
+            if (pluginIndex < 0)
+            {
+                continue;
+            }
+
+            PluginBase* plugin = m_plugins[pluginIndex];
+            group->DestroyPlugin(&plugin);
+        }
+    }
+
+    // Destroy State
+    int stateIndex = -1;
+    for (int i = 0; i < m_numMixGroupState; ++i)
+    {
+        if (m_mixGroupState[i].m_mixGroupHandle == mixGroupHandle)
+        {
+            stateIndex = i;
+            break;
+        }
+    }
+
+    RF_ASSERT(stateIndex >= 0, "Expected to find state");
+
+    m_mixGroupState[stateIndex] = m_mixGroupState[m_numMixGroupState - 1];
+    --m_numMixGroupState;
+    Sort();
+
+    AudioCommand cmd;
+    DestroyMixGroupCommand& data = EncodeAudioCommand<DestroyMixGroupCommand>(&cmd);
+    data.m_mixGroupIndex = stateIndex;
+    m_commands->Add(cmd);
+
+    // Null Out Mix Group
+    for (int i = 0; i < RF_MAX_MIX_GROUPS; ++i)
+    {
+        if (m_mixGroups[i].GetMixGroupHandle() == mixGroupHandle)
+        {
+            new (m_mixGroups + i) MixGroup(nullptr, nullptr, nullptr);
+            break;
+        }
+    }
+
+    *mixGroup = nullptr;
+}
+
+rf::MixGroup* rf::MixerSystem::GetMixGroup(MixGroupHandle mixGroupHandle)
+{
+    for (int i = 0; i < RF_MAX_MIX_GROUPS; ++i)
+    {
+        if (m_mixGroups[i].GetMixGroupHandle() == mixGroupHandle)
+        {
+            return &m_mixGroups[i];
+        }
+    }
+
+    RF_FAIL("Could not find mix group");
+    return nullptr;
+}
+
 rf::MixGroup* rf::MixerSystem::GetMasterMixGroup() const
 {
     return m_masterMixGroup;
@@ -153,9 +244,7 @@ void rf::MixerSystem::CreateMixGroupInternal(MixGroupHandle mixGroupHandle)
     state.m_isMaster = mixGroupHandle == masterMixGroupHandle;
     m_mixGroupState[m_numMixGroupState++] = state;
 
-    std::sort(m_mixGroupState, m_mixGroupState + m_numMixGroupState, [](const MixGroupState& a, const MixGroupState& b) {
-        return a.m_priority > b.m_priority;
-    });
+    Sort();
 
     AudioCommand cmd;
     CreateMixGroupCommand& data = EncodeAudioCommand<CreateMixGroupCommand>(&cmd);
@@ -225,9 +314,7 @@ float rf::MixerSystem::UpdateMixGroupPriority(int index)
 
     m_mixGroupState[index].m_priority = priority;
 
-    std::sort(m_mixGroupState, m_mixGroupState + m_numMixGroupState, [](const MixGroupState& a, const MixGroupState& b) {
-        return a.m_priority > b.m_priority;
-    });
+    Sort();
 
     return priority;
 }
@@ -310,7 +397,7 @@ rf::PluginBase** rf::MixerSystem::GetPluginBaseForDeletion(const PluginBase* plu
     const PluginHandle pluginHandle = plugin->GetPluginHandle();
     for (int i = 0; i < RF_MAX_MIX_GROUPS * RF_MAX_MIX_GROUP_PLUGINS; ++i)
     {
-        if (m_plugins[i]->GetPluginHandle() == pluginHandle)
+        if (m_plugins[i] && m_plugins[i]->GetPluginHandle() == pluginHandle)
         {
             *outIndex = i;
             return &m_plugins[*outIndex];
@@ -319,6 +406,13 @@ rf::PluginBase** rf::MixerSystem::GetPluginBaseForDeletion(const PluginBase* plu
 
     RF_FAIL("Cannot delete plugin.");
     return nullptr;
+}
+
+void rf::MixerSystem::Sort()
+{
+    std::sort(m_mixGroupState, m_mixGroupState + m_numMixGroupState, [](const MixGroupState& a, const MixGroupState& b) {
+        return a.m_priority > b.m_priority;
+    });
 }
 
 bool rf::MixerSystem::ProcessMessages(const Message& message)

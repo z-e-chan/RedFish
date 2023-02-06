@@ -438,6 +438,41 @@ void RedFishDemo::Example7_MixGroups()
 {
     if (ImGui::CollapsingHeader("Mix Groups"))
     {
+        if (ImGui::TreeNode("Mix Groups: Create and Destroy"))
+        {
+            static rf::SoundEffect s_testSound = m_soundEffectFootsteps;
+            static rf::Send* s_testSend1 = nullptr;
+            static rf::Send* s_testSend2 = nullptr;
+            static rf::GainPlugin* s_testGain = nullptr;
+            static rf::PanPlugin* s_testDelay = nullptr;
+
+            if (m_mixGroupTestCreateDestroy)
+            {
+                if (ImGui::Button("Play"))
+                {
+                    s_testSound.SetMixGroup(m_mixGroupTestCreateDestroy);
+                    s_testSound.Play();
+                }
+
+                if (ImGui::Button("Destroy"))
+                {
+                     m_context->GetMixerSystem()->DestroyMixGroup(&m_mixGroupTestCreateDestroy);
+                }
+            }
+            else
+            {
+                if (ImGui::Button("Create"))
+                {
+                    m_mixGroupTestCreateDestroy = m_context->GetMixerSystem()->CreateMixGroup();
+                    s_testSend1 = m_mixGroupTestCreateDestroy->CreateSend(m_mixGroupReverb);
+                    s_testSend2 = m_mixGroupTestCreateDestroy->CreateSend(m_mixGroupDelay);
+                    s_testGain = m_mixGroupTestCreateDestroy->CreatePlugin<rf::GainPlugin>();
+                    s_testDelay = m_mixGroupTestCreateDestroy->CreatePlugin<rf::PanPlugin>();
+                }
+            }
+
+            ImGui::TreePop();
+        }
         if (ImGui::TreeNode("Sends"))
         {
             if (m_sendTestCreateDestroy)
@@ -2386,6 +2421,11 @@ void RedFishDemo::Mixer()
             mixGroup->SetVolumeDb(volumeDb);
             ImGui::PopID();
         };
+
+        if (m_mixGroupTestCreateDestroy)
+        {
+            EditMixGroup("TestCreateDestroy", m_mixGroupTestCreateDestroy);
+        }
 
         EditMixGroup("Entities", m_mixGroupEntities);
         EditMixGroup("Ambience", m_mixGroupAmbience);

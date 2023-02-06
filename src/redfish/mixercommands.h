@@ -33,6 +33,12 @@ struct CreateMixGroupCommand
     static AudioCommandCallback s_callback;
 };
 
+struct DestroyMixGroupCommand
+{
+    int m_mixGroupIndex = -1;
+    static AudioCommandCallback s_callback;
+};
+
 struct SetMixGroupAmplitudeCommand
 {
     float m_amplitude = 1.0f;
