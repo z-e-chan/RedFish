@@ -32,13 +32,12 @@ namespace rf
 {
 class CommandProcessor;
 class Context;
-class GainPlugin;
 class Send;
 
 class MixGroup
 {
 public:
-    MixGroup(Context* context, CommandProcessor* commands, MixerSystem* mixerSystem);
+    MixGroup(Context* context, CommandProcessor* commands, MixerSystem* mixerSystem, const char* name);
     MixGroup(const MixGroup&) = delete;
     MixGroup(MixGroup&&) = delete;
     MixGroup& operator=(const MixGroup&) = delete;
@@ -51,9 +50,34 @@ public:
     void SetVolumeDb(float volumeDb);
     float GetVolumeDb() const;
     void SetOutputMixGroup(const MixGroup* mixGroup);
+    Send* CreateSend(const MixGroup* mixGroup, int slot);
     Send* CreateSend(const MixGroup* mixGroup);
+    Send* GetSend(int slot) const;
     void DestroySend(Send** send);
     float GetCurrentAmplitude() const;
+    MixGroup* GetOutputMixGroup();
+    const char* GetName() const;
+    PluginBase* GetPlugin(int slot);
+
+    template <typename T>
+    T* CreatePlugin(int slot)
+    {
+        if (!m_mixerSystem->CanCreatePlugin())
+        {
+            RF_FAIL("Too many plugins created in project. Increase RF_MAX_MIX_GROUP_PLUGINS");
+            return nullptr;
+        }
+
+        const int mixGroupSlot = slot;
+        MixGroupState& state = m_mixerSystem->GetMixGroupState(m_mixGroupHandle);
+
+        int pluginIndex;
+        PluginBase** base = m_mixerSystem->GetPluginBaseForCreation(&pluginIndex);
+        state.m_pluginSlots[mixGroupSlot] = pluginIndex;
+        T* plugin = Allocator::Allocate<T>("plugin", m_context, m_commands, m_mixGroupHandle, mixGroupSlot, pluginIndex);
+        *base = plugin;
+        return plugin;
+    }
 
     template <typename T>
     T* CreatePlugin()
@@ -81,12 +105,7 @@ public:
             return nullptr;
         }
 
-        int pluginIndex;
-        PluginBase** base = m_mixerSystem->GetPluginBaseForCreation(&pluginIndex);
-        state.m_pluginSlots[mixGroupSlot] = pluginIndex;
-        T* plugin = Allocator::Allocate<T>(typeid(T).name(), m_context, m_commands, m_mixGroupHandle, mixGroupSlot, pluginIndex);
-        *base = plugin;
-        return plugin;
+        return CreatePlugin<T>(mixGroupSlot);
     }
 
     template <typename T>
@@ -114,10 +133,26 @@ public:
         *plugin = nullptr;
     }
 
+    template <typename T>
+    T* GetPlugin(int slot)
+    {
+        if (slot >= 0 && slot < RF_MAX_MIX_GROUP_PLUGINS)
+        {
+            const MixGroupState& state = m_mixerSystem->GetMixGroupState(m_mixGroupHandle);
+            const int index = state.m_pluginSlots[slot];
+            return static_cast<T*>(m_mixerSystem->GetPlugin(index));
+        }
+
+        RF_FAIL("Slot out of bounds");
+        return nullptr;
+    }
+
 private:
+    char m_name[RF_MAX_NAME_SIZE] = {};
     Context* m_context = nullptr;
     CommandProcessor* m_commands = nullptr;
     MixerSystem* m_mixerSystem = nullptr;
+    MixGroup* m_output = nullptr;
     MixGroupHandle m_mixGroupHandle;
 };
 }  // namespace rf

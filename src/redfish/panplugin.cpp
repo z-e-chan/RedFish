@@ -28,7 +28,7 @@
 #include "pluginutils.h"
 
 rf::PanPlugin::PanPlugin(Context* context, CommandProcessor* commands, MixGroupHandle mixGroupHandle, int mixGroupSlot, int pluginIndex)
-    : PluginBase(context, commands, mixGroupHandle, mixGroupSlot, pluginIndex)
+    : PluginBase(context, commands, mixGroupHandle, mixGroupSlot, pluginIndex, PluginBase::Type::Pan)
 {
     RF_SEND_PLUGIN_CREATE_COMMAND(CreatePanDSPCommand);
 }
@@ -57,4 +57,14 @@ void rf::PanPlugin::SetAngle(float angle)
 float rf::PanPlugin::GetAngle() const
 {
     return m_angle;
+}
+
+void rf::PanPlugin::ToJson(nlohmann::ordered_json& json) const
+{
+    json["angle"] = GetAngle();
+}
+
+void rf::PanPlugin::FromJson(const nlohmann::ordered_json& json)
+{
+    SetAngle(json.value("angle", GetAngle()));
 }

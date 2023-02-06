@@ -35,6 +35,10 @@ rf::AudioCommandCallback rf::DestroyMixGroupCommand::s_callback = [](AudioTimeli
     timeline->m_summingMixer.DestroyMixGroup(cmd.m_mixGroupIndex);
 };
 
+rf::AudioCommandCallback rf::DestroyAllMixGroupsCommand::s_callback = [](AudioTimeline* timeline, void*) {
+    timeline->m_summingMixer.DestroyAllMixGroups();
+};
+
 rf::AudioCommandCallback rf::SetMixGroupAmplitudeCommand::s_callback = [](AudioTimeline* timeline, void* command) {
     const SetMixGroupAmplitudeCommand& cmd = *static_cast<SetMixGroupAmplitudeCommand*>(command);
     SummingMixer::MixGroupInternal* mixGroup = timeline->m_summingMixer.MixGroupLookUp(cmd.m_mixGroupHandle);

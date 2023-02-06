@@ -31,7 +31,7 @@ rf::IIR2HighpassFilterPlugin::IIR2HighpassFilterPlugin(Context* context,
                                                        MixGroupHandle mixGroupHandle,
                                                        int mixGroupSlot,
                                                        int pluginIndex)
-    : PluginBase(context, commands, mixGroupHandle, mixGroupSlot, pluginIndex)
+    : PluginBase(context, commands, mixGroupHandle, mixGroupSlot, pluginIndex, PluginBase::Type::IIR2HighpassFilter)
 {
     RF_SEND_PLUGIN_CREATE_COMMAND(CreateIIR2HighpassFilterDSPCommand);
 }
@@ -81,4 +81,16 @@ void rf::IIR2HighpassFilterPlugin::SetCutoff(float cutoff)
 float rf::IIR2HighpassFilterPlugin::GetCutoff() const
 {
     return m_cutoff;
+}
+
+void rf::IIR2HighpassFilterPlugin::ToJson(nlohmann::ordered_json& json) const
+{
+    json["q"] = GetQ();
+    json["cutoff"] = GetCutoff();
+}
+
+void rf::IIR2HighpassFilterPlugin::FromJson(const nlohmann::ordered_json& json)
+{
+    SetQ(json.value("q", GetQ()));
+    SetCutoff(json.value("cutoff", GetCutoff()));
 }

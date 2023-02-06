@@ -42,6 +42,9 @@ public:
     void SetCutoff(float cutoff);
     float GetCutoff() const;
 
+    void ToJson(nlohmann::ordered_json& json) const override;
+    void FromJson(const nlohmann::ordered_json& json) override;
+
 private:
     int m_order = 1;
     float m_cutoff = PluginUtils::k_maxFilterCutoff;

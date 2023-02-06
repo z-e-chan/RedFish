@@ -43,11 +43,13 @@ void RedFishDemo::OnAudioCallback(float* buffer, int bufferSize)
 void RedFishDemo::OnApplicationUpdate(float dt)
 {
     m_context->Update();
+    m_editor->Update();
 
     const rf::Version& version = rf::GetVersion();
     char buffer[64];
     sprintf_s(buffer, "RedFish Demo v%i.%i.%i", version.m_major, version.m_minor, version.m_patch);
     ImGui::Begin(buffer);
+
     Example6_PlaySoundEffects();
     Example7_MixGroups();
     Example9_Music();
@@ -96,6 +98,8 @@ void RedFishDemo::Example1_Construction(int bufferSize, int numChannles, int sam
     // Create a rf::AudioCallback using the context we just made.
 
     m_callback = new rf::AudioCallback(m_context);
+
+    m_editor = new rf::Editor(m_context);
 }
 
 void RedFishDemo::Example2_Destruction()
@@ -108,6 +112,8 @@ void RedFishDemo::Example2_Destruction()
     delete m_callback;
     m_callback = nullptr;
     m_unlockAudioDevice();
+
+    delete m_editor;
 }
 
 void RedFishDemo::Example3_LoadingAudioAssets()
@@ -182,16 +188,16 @@ void RedFishDemo::Example4_CreateMixGroups()
 
     rf::MixerSystem* mixerSystem = m_context->GetMixerSystem();
 
-    m_mixGroupEntities = mixerSystem->CreateMixGroup();
-    m_mixGroupAmbience = mixerSystem->CreateMixGroup();
-    m_mixGroupReverb = mixerSystem->CreateMixGroup();
-    m_mixGroupDelay = mixerSystem->CreateMixGroup();
-    m_mixGroupLeads = mixerSystem->CreateMixGroup();
-    m_mixGroupBass = mixerSystem->CreateMixGroup();
-    m_mixGroupDrums = mixerSystem->CreateMixGroup();
-    m_mixGroupMusic = mixerSystem->CreateMixGroup();
-    m_mixGroupSounds = mixerSystem->CreateMixGroup();
-    m_mixGroupTestSendTo = mixerSystem->CreateMixGroup();
+    m_mixGroupEntities = mixerSystem->CreateMixGroup("Entities");
+    m_mixGroupAmbience = mixerSystem->CreateMixGroup("Ambience");
+    m_mixGroupReverb = mixerSystem->CreateMixGroup("Reverb");
+    m_mixGroupDelay = mixerSystem->CreateMixGroup("Delay");
+    m_mixGroupLeads = mixerSystem->CreateMixGroup("Leads");
+    m_mixGroupBass = mixerSystem->CreateMixGroup("Bass");
+    m_mixGroupDrums = mixerSystem->CreateMixGroup("Drums");
+    m_mixGroupMusic = mixerSystem->CreateMixGroup("Music");
+    m_mixGroupSounds = mixerSystem->CreateMixGroup("Sounds");
+    m_mixGroupTestSendTo = mixerSystem->CreateMixGroup("Send To Test");
     m_mixGroupMaster = mixerSystem->GetMasterMixGroup();
 
     // Use rf::MixGroup::SetOutputMixGroup to route the signal from a mix group through another one.
@@ -226,6 +232,21 @@ void RedFishDemo::Example4_CreateMixGroups()
     m_limiterMaster = m_mixGroupMaster->CreatePlugin<rf::LimiterPlugin>();
     m_convolverReverb = m_mixGroupReverb->CreatePlugin<rf::ConvolverPlugin>();
     m_positioningEntities = m_mixGroupEntities->CreatePlugin<rf::PositioningPlugin>();
+
+    m_context->Deserialize("redfish.json");
+
+    mixerSystem = m_context->GetMixerSystem();
+    m_mixGroupEntities = mixerSystem->GetMixGroup("Entities");
+    m_mixGroupAmbience = mixerSystem->GetMixGroup("Ambience");
+    m_mixGroupReverb = mixerSystem->GetMixGroup("Reverb");
+    m_mixGroupDelay = mixerSystem->GetMixGroup("Delay");
+    m_mixGroupLeads = mixerSystem->GetMixGroup("Leads");
+    m_mixGroupBass = mixerSystem->GetMixGroup("Bass");
+    m_mixGroupDrums = mixerSystem->GetMixGroup("Drums");
+    m_mixGroupMusic = mixerSystem->GetMixGroup("Music");
+    m_mixGroupSounds = mixerSystem->GetMixGroup("Sounds");
+    m_mixGroupTestSendTo = mixerSystem->GetMixGroup("Send To Test");
+    m_mixGroupMaster = mixerSystem->GetMasterMixGroup();
 }
 
 void RedFishDemo::Example5_CreateSoundEffects()
@@ -456,14 +477,14 @@ void RedFishDemo::Example7_MixGroups()
 
                 if (ImGui::Button("Destroy"))
                 {
-                     m_context->GetMixerSystem()->DestroyMixGroup(&m_mixGroupTestCreateDestroy);
+                    m_context->GetMixerSystem()->DestroyMixGroup(&m_mixGroupTestCreateDestroy);
                 }
             }
             else
             {
                 if (ImGui::Button("Create"))
                 {
-                    m_mixGroupTestCreateDestroy = m_context->GetMixerSystem()->CreateMixGroup();
+                    m_mixGroupTestCreateDestroy = m_context->GetMixerSystem()->CreateMixGroup("Create Destroy Test");
                     s_testSend1 = m_mixGroupTestCreateDestroy->CreateSend(m_mixGroupReverb);
                     s_testSend2 = m_mixGroupTestCreateDestroy->CreateSend(m_mixGroupDelay);
                     s_testGain = m_mixGroupTestCreateDestroy->CreatePlugin<rf::GainPlugin>();

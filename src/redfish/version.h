@@ -30,6 +30,7 @@ struct Version
     int m_minor = 0;
     int m_patch = 0;
 
+    Version() = default;
     Version(int major, int minor, int patch);
     bool operator==(const Version& version) const;
 };

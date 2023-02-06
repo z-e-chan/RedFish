@@ -56,6 +56,8 @@ public:
     const AudioSpec& GetAudioSpec() const;
     int GetNumPlayingVoices() const;
     const std::vector<PlayingSoundInfo>& GetPlayingSoundInfo() const;
+    void Serialize() const;
+    void Deserialize(const char* path);
 
 private:
     AudioSpec m_spec;

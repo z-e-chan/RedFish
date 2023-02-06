@@ -28,7 +28,7 @@
 #include "pluginutils.h"
 
 rf::GainPlugin::GainPlugin(Context* context, CommandProcessor* commands, MixGroupHandle mixGroupHandle, int mixGroupSlot, int pluginIndex)
-    : PluginBase(context, commands, mixGroupHandle, mixGroupSlot, pluginIndex)
+    : PluginBase(context, commands, mixGroupHandle, mixGroupSlot, pluginIndex, PluginBase::Type::Gain)
 {
     RF_SEND_PLUGIN_CREATE_COMMAND(CreateGainDSPCommand);
 }
@@ -57,4 +57,14 @@ void rf::GainPlugin::SetGainDb(float gainDb)
 float rf::GainPlugin::GetGainDb() const
 {
     return m_gainDb;
+}
+
+void rf::GainPlugin::ToJson(nlohmann::ordered_json& json) const
+{
+    json["gainDb"] = GetGainDb();
+}
+
+void rf::GainPlugin::FromJson(const nlohmann::ordered_json& json)
+{
+    SetGainDb(json.value("gainDb", GetGainDb()));
 }

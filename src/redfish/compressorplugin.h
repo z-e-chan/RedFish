@@ -47,6 +47,9 @@ public:
     void SetRelease(float release);
     float GetRelease() const;
 
+    void ToJson(nlohmann::ordered_json& json) const override;
+    void FromJson(const nlohmann::ordered_json& json) override;
+
 private:
     float m_threshold = -24.0f;
     float m_ratio = 1.0f;

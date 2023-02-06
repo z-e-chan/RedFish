@@ -1,6 +1,8 @@
 #pragma once
 #include <redfish/redfishapi.h>
 
+#include "editor/include/editor.h"
+
 class RedFishDemo
 {
 public:
@@ -32,6 +34,7 @@ private:
 
     rf::Context* m_context = nullptr;
     rf::AudioCallback* m_callback = nullptr;
+    rf::Editor* m_editor = nullptr;
 
     rf::AudioHandle m_assetFootstep1;
     rf::AudioHandle m_assetFootstep2;

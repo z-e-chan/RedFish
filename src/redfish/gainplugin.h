@@ -39,6 +39,9 @@ public:
     void SetGainDb(float gainDb);
     float GetGainDb() const;
 
+    void ToJson(nlohmann::ordered_json& json) const override;
+    void FromJson(const nlohmann::ordered_json& json) override;
+
 private:
     float m_gainDb = 0.0f;
 };

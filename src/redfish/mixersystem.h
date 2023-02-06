@@ -21,6 +21,8 @@
 // SOFTWARE.
 
 #pragma once
+#include <external/nlohmann/json.hpp>
+
 #include "identifiers.h"
 
 namespace rf
@@ -45,9 +47,13 @@ public:
     MixerSystem& operator=(MixerSystem&&) = delete;
     ~MixerSystem();
 
-    MixGroup* CreateMixGroup();
+    bool CanCreateMixGroup(const char* name);
+    MixGroup* CreateMixGroup(const char* name);
     void DestroyMixGroup(MixGroup** mixGroup);
     MixGroup* GetMixGroup(MixGroupHandle mixGroupHandle);
+    const MixGroup* GetMixGroup(MixGroupHandle mixGroupHandle) const;
+    MixGroup* GetMixGroup(const char* name);
+    MixGroup* GetMixGroup(int index);
     MixGroup* GetMasterMixGroup() const;
     void FadeMixGroups(const MixGroup** mixGroups, int numMixGroups, float volumeDb, const Sync& sync, const Sync& duration, const Stinger* stinger);
     void FadeMixGroups(const MixGroup** mixGroups, int numMixGroups, float volumeDb, const Sync& sync, const Sync& duration);
@@ -62,6 +68,9 @@ private:
     PluginBase** m_plugins = nullptr;
     int m_numMixGroupState = 0;
 
+    void Allocate();
+    void Free();
+    void CreateMasterMixGroup();
     int GetMixGroupIndex(MixGroupHandle mixGroupHandle) const;
     void CreateMixGroupInternal(MixGroupHandle mixGroupHandle);
     MixGroupState& GetMixGroupState(MixGroupHandle mixGroupHandle);
@@ -71,14 +80,22 @@ private:
     float UpdateMixGroupPriority(int index);
     bool CanCreateSend() const;
     Send* CreateSend(MixGroupHandle sendToMixGroupHandle, int* outIndex);
+    Send* GetSend(int index);
     int DestroySend(const Send* send);
     bool CanCreatePlugin() const;
     PluginBase** GetPluginBaseForCreation(int* outIndex);
     PluginBase** GetPluginBaseForDeletion(const PluginBase* plugin, int* outIndex);
+    PluginBase* GetPlugin(int pluginIndex);
+    const PluginBase* GetPlugin(int pluginIndex) const;
     void Sort();
     bool ProcessMessages(const Message& message);
 
     friend class Context;
     friend class MixGroup;
+    friend void to_json(nlohmann::ordered_json& json, const MixerSystem& object);
+    friend void from_json(const nlohmann::ordered_json& json, MixerSystem& object);
 };
+
+void to_json(nlohmann::ordered_json& json, const MixerSystem& object);
+void from_json(const nlohmann::ordered_json& json, MixerSystem& object);
 }  // namespace rf

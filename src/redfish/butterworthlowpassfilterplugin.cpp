@@ -31,7 +31,7 @@ rf::ButterworthLowpassFilterPlugin::ButterworthLowpassFilterPlugin(Context* cont
                                                                    MixGroupHandle mixGroupHandle,
                                                                    int mixGroupSlot,
                                                                    int pluginIndex)
-    : PluginBase(context, commands, mixGroupHandle, mixGroupSlot, pluginIndex)
+    : PluginBase(context, commands, mixGroupHandle, mixGroupSlot, pluginIndex, PluginBase::Type::ButterworthLowpassFilter)
 {
     RF_SEND_PLUGIN_CREATE_COMMAND(CreateButterworthLowpassFilterDSPCommand);
 }
@@ -81,4 +81,16 @@ void rf::ButterworthLowpassFilterPlugin::SetCutoff(float cutoff)
 float rf::ButterworthLowpassFilterPlugin::GetCutoff() const
 {
     return m_cutoff;
+}
+
+void rf::ButterworthLowpassFilterPlugin::ToJson(nlohmann::ordered_json& json) const
+{
+    json["order"] = GetOrder();
+    json["cutoff"] = GetCutoff();
+}
+
+void rf::ButterworthLowpassFilterPlugin::FromJson(const nlohmann::ordered_json& json)
+{
+    SetOrder(json.value("order", GetOrder()));
+    SetCutoff(json.value("cutoff", GetCutoff()));
 }

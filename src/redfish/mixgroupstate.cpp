@@ -34,3 +34,17 @@ rf::MixGroupState::MixGroupState()
         m_pluginSlots[i] = -1;
     }
 }
+
+void rf::to_json(nlohmann::ordered_json& json, const MixGroupState& object)
+{
+    nlohmann::ordered_json j;
+    j["volumeDb"] = object.m_volumeDb;
+    j["isMaster"] = object.m_isMaster;
+    json = j;
+}
+
+void rf::from_json(const nlohmann::ordered_json& json, MixGroupState& object)
+{
+    object.m_volumeDb = json["volumeDb"];
+    object.m_isMaster = json["isMaster"];
+}

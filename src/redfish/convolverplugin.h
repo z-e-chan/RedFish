@@ -43,6 +43,9 @@ public:
     void SetIRVolumeDb(float volumeDb, int index);
     float GetIRVolumeDb(int index) const;
 
+    void ToJson(nlohmann::ordered_json& json) const override;
+    void FromJson(const nlohmann::ordered_json& json) override;
+
 private:
     float* m_amplitudes = nullptr;
     float m_wetPercentage = 1.0f;

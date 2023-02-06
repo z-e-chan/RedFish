@@ -28,7 +28,7 @@
 #include "pluginutils.h"
 
 rf::DelayPlugin::DelayPlugin(Context* context, CommandProcessor* commands, MixGroupHandle mixGroupHandle, int mixGroupSlot, int pluginIndex)
-    : PluginBase(context, commands, mixGroupHandle, mixGroupSlot, pluginIndex)
+    : PluginBase(context, commands, mixGroupHandle, mixGroupSlot, pluginIndex, PluginBase::Type::Delay)
 {
     RF_SEND_PLUGIN_CREATE_COMMAND(CreateDelayDSPCommand);
 }
@@ -78,4 +78,16 @@ void rf::DelayPlugin::SetFeedback(float feedback)
 float rf::DelayPlugin::GetFeedback() const
 {
     return m_feedback;
+}
+
+void rf::DelayPlugin::ToJson(nlohmann::ordered_json& json) const
+{
+    json["delay"] = GetDelay();
+    json["feedback"] = GetFeedback();
+}
+
+void rf::DelayPlugin::FromJson(const nlohmann::ordered_json& json)
+{
+    SetDelay(json.value("delay", GetDelay()));
+    SetFeedback(json.value("feedback", GetFeedback()));
 }

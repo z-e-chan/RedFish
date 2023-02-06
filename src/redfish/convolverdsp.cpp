@@ -216,6 +216,16 @@ void rf::ConvolverDSP::UnloadIR(int index)
     if (m_numIrs == 0)
     {
         m_loaded = false;
+
+        for (int i = 0; i < PluginUtils::k_maxChannels; ++i)
+        {
+            for (int j = 0; j < PluginUtils::k_maxConvolverIRs; ++j)
+            {
+                Allocator::s_deallocate(m_irArray[i][j]);
+            }
+            Allocator::s_deallocate(m_irArray[i]);
+        }
+        Allocator::s_deallocate(m_irArray);
     }
 }
 

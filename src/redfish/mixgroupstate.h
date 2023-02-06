@@ -21,6 +21,10 @@
 // SOFTWARE.
 
 #pragma once
+#include <float.h>
+
+#include <external/nlohmann/json.hpp>
+
 #include "defines.h"
 #include "identifiers.h"
 
@@ -32,11 +36,14 @@ struct MixGroupState
     MixGroupHandle m_outputMixGroupHandle;
     int m_sendSlots[RF_MAX_MIX_GROUP_SENDS];
     int m_pluginSlots[RF_MAX_MIX_GROUP_PLUGINS];
-    float m_peakAmplitude = 0.0f;
+    float m_peakAmplitude = -FLT_MAX;
     float m_priority = 0.0f;
     float m_volumeDb = 0.0f;
     bool m_isMaster = false;
 
     MixGroupState();
 };
+
+void to_json(nlohmann::ordered_json& json, const MixGroupState& object);
+void from_json(const nlohmann::ordered_json& json, MixGroupState& object);
 }  // namespace rf

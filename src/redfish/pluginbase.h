@@ -21,6 +21,8 @@
 // SOFTWARE.
 
 #pragma once
+#include <external/nlohmann/json.hpp>
+
 #include "identifiers.h"
 
 namespace rf
@@ -31,7 +33,25 @@ class Context;
 class PluginBase
 {
 public:
-    PluginBase(Context* context, CommandProcessor* commands, MixGroupHandle mixGroupHandle, int mixGroupSlot, int pluginIndex);
+    enum class Type
+    {
+        Invalid,
+        ButterworthHighpassFilter,
+        ButterworthLowpassFilter,
+        Compressor,
+        Convolver,
+        Delay,
+        Gain,
+        IIR2HighpassFilter,
+        IIR2LowpassFilter,
+        Limiter,
+        Pan,
+        Positioning,
+
+        Version = 1,
+    };
+
+    PluginBase(Context* context, CommandProcessor* commands, MixGroupHandle mixGroupHandle, int mixGroupSlot, int pluginIndex, Type type);
     PluginBase(const PluginBase&) = delete;
     PluginBase(PluginBase&&) = delete;
     PluginBase& operator=(const PluginBase&) = delete;
@@ -39,14 +59,19 @@ public:
     virtual ~PluginBase() = default;
 
     PluginHandle GetPluginHandle() const;
+    Type GetType() const;
     void SetBypass(bool bypass);
     bool GetBypass() const;
+
+    virtual void ToJson(nlohmann::ordered_json& json) const = 0;
+    virtual void FromJson(const nlohmann::ordered_json& json) = 0;
 
 protected:
     Context* m_context = nullptr;
     CommandProcessor* m_commands = nullptr;
     PluginHandle m_pluginHandle;
     MixGroupHandle m_mixGroupHandle;
+    Type m_type = Type::Invalid;
     int m_mixGroupSlot = -1;
     int m_pluginIndex = -1;
     bool m_bypass = false;
