@@ -56,6 +56,13 @@ void rf::SummingMixer::CreateMixGroup(const MixGroupState& state)
     Sort();
 }
 
+void rf::SummingMixer::DestroyMixGroup(int mixGroupIndex)
+{
+    m_mixGroups[mixGroupIndex] = m_mixGroups[m_numMixGroups - 1];
+    --m_numMixGroups;
+    Sort();
+}
+
 void rf::SummingMixer::Sum(void* buffer, MixItem* mixItems, int numMixItems, int bufferSize, Messenger* messenger)
 {
     // Iterate through mix groups.

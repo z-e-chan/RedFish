@@ -100,6 +100,7 @@ private:
     rf::MixGroup* m_mixGroupDrums = nullptr;
     rf::MixGroup* m_mixGroupMusic = nullptr;
     rf::MixGroup* m_mixGroupTestSendTo = nullptr;
+    rf::MixGroup* m_mixGroupTestCreateDestroy = nullptr;
     rf::MixGroup* m_mixGroupMaster = nullptr;
 
     rf::SoundEffect m_soundEffectFootsteps;
