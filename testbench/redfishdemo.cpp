@@ -15,6 +15,7 @@ RedFishDemo::RedFishDemo(int bufferSize, int numChannles, int sampleRate, void (
     Example3_LoadingAudioAssets();
     Example4_CreateMixGroups();
     Example5_CreateSoundEffects();
+    Example10_Events();
 }
 
 RedFishDemo::~RedFishDemo()
@@ -53,6 +54,12 @@ void RedFishDemo::OnApplicationUpdate(float dt)
     Mixer();
     StressTest();
     FuzzTest();
+
+    if (ImGui::CollapsingHeader("Events"))
+    {
+        ImGui::Checkbox("Print Events to Console", &m_printEventsToConsole);
+    }
+
     Example8_ViewPlayingSounds();
     ImGui::End();
 
@@ -117,6 +124,9 @@ void RedFishDemo::Example3_LoadingAudioAssets()
     m_assetFootstep6 = assetSystem->Load("../testbench/testdata/a2-tile-land-006.wav");
 
     m_assetBirdLoop = assetSystem->Load("../testbench/testdata/bird_loop.wav");
+    const rf::AudioHandle duplicateTest = assetSystem->Load("../testbench/testdata/bird_loop.wav");
+    // Loading an audio file with the same path will return the same audio handle
+    assert(m_assetBirdLoop == duplicateTest);
 
     m_assetIRSmall = assetSystem->Load("../testbench/testdata/ir/reverb_small.wav");
     m_assetIRMedium = assetSystem->Load("../testbench/testdata/ir/reverb_medium.wav");
@@ -428,6 +438,41 @@ void RedFishDemo::Example7_MixGroups()
 {
     if (ImGui::CollapsingHeader("Mix Groups"))
     {
+        if (ImGui::TreeNode("Mix Groups: Create and Destroy"))
+        {
+            static rf::SoundEffect s_testSound = m_soundEffectFootsteps;
+            static rf::Send* s_testSend1 = nullptr;
+            static rf::Send* s_testSend2 = nullptr;
+            static rf::GainPlugin* s_testGain = nullptr;
+            static rf::PanPlugin* s_testDelay = nullptr;
+
+            if (m_mixGroupTestCreateDestroy)
+            {
+                if (ImGui::Button("Play"))
+                {
+                    s_testSound.SetMixGroup(m_mixGroupTestCreateDestroy);
+                    s_testSound.Play();
+                }
+
+                if (ImGui::Button("Destroy"))
+                {
+                     m_context->GetMixerSystem()->DestroyMixGroup(&m_mixGroupTestCreateDestroy);
+                }
+            }
+            else
+            {
+                if (ImGui::Button("Create"))
+                {
+                    m_mixGroupTestCreateDestroy = m_context->GetMixerSystem()->CreateMixGroup();
+                    s_testSend1 = m_mixGroupTestCreateDestroy->CreateSend(m_mixGroupReverb);
+                    s_testSend2 = m_mixGroupTestCreateDestroy->CreateSend(m_mixGroupDelay);
+                    s_testGain = m_mixGroupTestCreateDestroy->CreatePlugin<rf::GainPlugin>();
+                    s_testDelay = m_mixGroupTestCreateDestroy->CreatePlugin<rf::PanPlugin>();
+                }
+            }
+
+            ImGui::TreePop();
+        }
         if (ImGui::TreeNode("Sends"))
         {
             if (m_sendTestCreateDestroy)
@@ -2275,6 +2320,38 @@ void RedFishDemo::Example9_Music()
     }
 }
 
+void RedFishDemo::Example10_Events()
+{
+    // You can register callbacks which are called when certain RedFish events happen.
+
+    rf::EventSystem* eventSystem = m_context->GetEventSystem();
+    eventSystem->SetUserData(&m_printEventsToConsole);
+
+    eventSystem->RegisterOnBar([](int bar, int beat, void* userData) {
+        const bool printToConsole = *static_cast<bool*>(userData);
+        if (printToConsole)
+        {
+            printf("[EVENT] OnBar: %i, %i\n", bar, beat);
+        }
+    });
+
+    eventSystem->RegisterOnBeat([](int bar, int beat, void* userData) {
+        const bool printToConsole = *static_cast<bool*>(userData);
+        if (printToConsole)
+        {
+            printf("[EVENT] OnBeat: %i, %i\n", bar, beat);
+        }
+    });
+
+    eventSystem->RegisterOnMusicFinished([](void* userData) {
+        const bool printToConsole = *static_cast<bool*>(userData);
+        if (printToConsole)
+        {
+            printf("[EVENT] OnMusicFinished\n");
+        }
+    });
+}
+
 void RedFishDemo::StressTest()
 {
     ImGui::PushID("StressTest");
@@ -2344,6 +2421,11 @@ void RedFishDemo::Mixer()
             mixGroup->SetVolumeDb(volumeDb);
             ImGui::PopID();
         };
+
+        if (m_mixGroupTestCreateDestroy)
+        {
+            EditMixGroup("TestCreateDestroy", m_mixGroupTestCreateDestroy);
+        }
 
         EditMixGroup("Entities", m_mixGroupEntities);
         EditMixGroup("Ambience", m_mixGroupAmbience);

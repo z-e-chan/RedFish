@@ -30,6 +30,7 @@
 #include "convolverplugin.h"
 #include "cue.h"
 #include "delayplugin.h"
+#include "eventsystem.h"
 #include "gainplugin.h"
 #include "iir2highpassfilterplugin.h"
 #include "iir2lowpassfilterplugin.h"

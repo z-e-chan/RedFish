@@ -30,7 +30,7 @@ rf::MixGroup::MixGroup(Context* context, CommandProcessor* commands, MixerSystem
     : m_context(context)
     , m_commands(commands)
     , m_mixerSystem(mixerSystem)
-    , m_mixGroupHandle(CreateMixGroupHandle())
+    , m_mixGroupHandle(m_commands ? CreateMixGroupHandle() : MixGroupHandle())
 {
 }
 

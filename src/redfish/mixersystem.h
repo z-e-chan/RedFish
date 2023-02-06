@@ -46,6 +46,8 @@ public:
     ~MixerSystem();
 
     MixGroup* CreateMixGroup();
+    void DestroyMixGroup(MixGroup** mixGroup);
+    MixGroup* GetMixGroup(MixGroupHandle mixGroupHandle);
     MixGroup* GetMasterMixGroup() const;
     void FadeMixGroups(const MixGroup** mixGroups, int numMixGroups, float volumeDb, const Sync& sync, const Sync& duration, const Stinger* stinger);
     void FadeMixGroups(const MixGroup** mixGroups, int numMixGroups, float volumeDb, const Sync& sync, const Sync& duration);
@@ -73,6 +75,7 @@ private:
     bool CanCreatePlugin() const;
     PluginBase** GetPluginBaseForCreation(int* outIndex);
     PluginBase** GetPluginBaseForDeletion(const PluginBase* plugin, int* outIndex);
+    void Sort();
     bool ProcessMessages(const Message& message);
 
     friend class Context;

@@ -54,6 +54,7 @@ rf::AudioHandle rf::DataCache::AllocateAudioData(const float* samples, const cha
             AudioData& data = m_audioData[i];
             data.Allocate(numChannels, numSamples / numChannels, samples);
             data.m_name = path;
+            ++data.m_referenceCount;
             return handle;
         }
     }
@@ -115,4 +116,50 @@ const rf::AudioData* rf::DataCache::GetAudioData(int index) const
 {
     RF_ASSERT(index >= 0 && index < RF_MAX_AUDIO_DATA, "Index out of bounds");
     return &m_audioData[index];
+}
+
+rf::AudioHandle rf::DataCache::AssetExists(const char* path)
+{
+    for (int i = 0; i < RF_MAX_AUDIO_DATA; ++i)
+    {
+        if (m_audioData[i].m_name && path)
+        {
+            if (strcmp(m_audioData[i].m_name, path) == 0)
+            {
+                return m_audioDataHandleLookupList[i];
+            }
+        }
+    }
+
+    return AudioHandle();
+}
+
+void rf::DataCache::IncrementReferenceCount(AudioHandle audioHandle)
+{
+    for (int i = 0; i < RF_MAX_AUDIO_DATA; ++i)
+    {
+        if (m_audioDataHandleLookupList[i] == audioHandle)
+        {
+            ++m_audioData[i].m_referenceCount;
+            return;
+        }
+    }
+
+    RF_FAIL("Cannot increment audio asset reference count");
+}
+
+bool rf::DataCache::DecrementReferenceCount(AudioHandle audioHandle)
+{
+    for (int i = 0; i < RF_MAX_AUDIO_DATA; ++i)
+    {
+        if (m_audioDataHandleLookupList[i] == audioHandle)
+        {
+            --m_audioData[i].m_referenceCount;
+            RF_ASSERT(m_audioData[i].m_referenceCount >= 0, "Bad reference counting");
+            return m_audioData[i].m_referenceCount == 0;
+        }
+    }
+
+    RF_FAIL("Cannot increment audio asset reference count");
+    return false;
 }

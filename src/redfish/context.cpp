@@ -26,6 +26,7 @@
 #include "audiocallback.h"
 #include "audiodata.h"
 #include "audiotimeline.h"
+#include "eventsystem.h"
 #include "loadcommands.h"
 #include "mixersystem.h"
 #include "musicsystem.h"
@@ -39,6 +40,7 @@ rf::Context::Context(const Config& config)
     m_assetSystem = Allocator::Allocate<AssetSystem>("AssetSystem", &m_commandProcessor);
     m_mixerSystem = Allocator::Allocate<MixerSystem>("MixerSystem", this, &m_commandProcessor);
     m_musicSystem = Allocator::Allocate<MusicSystem>("MusicSystem", &m_commandProcessor, m_assetSystem);
+    m_eventSystem = Allocator::Allocate<EventSystem>("EventSystem", &m_commandProcessor);
     m_playingSoundInfo.reserve(RF_MAX_VOICES);
 }
 
@@ -68,6 +70,7 @@ rf::Context::~Context()
     Allocator::Deallocate<AssetSystem>(&m_assetSystem);
     Allocator::Deallocate<MixerSystem>(&m_mixerSystem);
     Allocator::Deallocate<MusicSystem>(&m_musicSystem);
+    Allocator::Deallocate<EventSystem>(&m_eventSystem);
     m_timeline = nullptr;
     m_config.m_unlockAudioDevice();
 }
@@ -77,57 +80,64 @@ void rf::Context::Update()
     Message msg;
     while (m_timeline->m_messenger.Dequeue(msg))
     {
+        bool processed = false;
+
         if (m_assetSystem->ProcessMessages(msg))
         {
-            continue;
+            processed = true;
         }
 
         if (m_mixerSystem->ProcessMessages(msg))
         {
-            continue;
+            processed = true;
         }
 
         if (m_musicSystem->ProcessMessages(msg))
         {
-            continue;
+            processed = true;
         }
 
-        switch (msg.m_type)
+        if (!processed)
         {
-            case MessageType::ContextVoiceStart:
+            switch (msg.m_type)
             {
-                const Message::ContextVoiceStartData& data = *msg.GetContextVoiceStartData();
-                const AudioData* audioData = m_assetSystem->GetAudioData(data.m_audioHandle);
-                m_playingSoundInfo.push_back({audioData->m_name, data.m_audioHandle});
-                break;
-            }
-            case MessageType::ContextVoiceStop:
-            {
-                const Message::ContextVoiceStopData& data = *msg.GetContextVoiceStopData();
-                const int size = static_cast<int>(m_playingSoundInfo.size());
-
-                bool found = false;
-                for (int i = 0; i < size; ++i)
+                case MessageType::ContextVoiceStart:
                 {
-                    if (m_playingSoundInfo[i].m_audioHandle == data.m_audioHandle)
-                    {
-                        m_playingSoundInfo.erase(m_playingSoundInfo.begin() + i);
-                        found = true;
-                        break;
-                    }
+                    const Message::ContextVoiceStartData& data = *msg.GetContextVoiceStartData();
+                    const AudioData* audioData = m_assetSystem->GetAudioData(data.m_audioHandle);
+                    m_playingSoundInfo.push_back({audioData->m_name, data.m_audioHandle});
+                    break;
                 }
+                case MessageType::ContextVoiceStop:
+                {
+                    const Message::ContextVoiceStopData& data = *msg.GetContextVoiceStopData();
+                    const int size = static_cast<int>(m_playingSoundInfo.size());
 
-                RF_ASSERT(found, "We are trying to remove a sound that we have not played.");
-                break;
+                    bool found = false;
+                    for (int i = 0; i < size; ++i)
+                    {
+                        if (m_playingSoundInfo[i].m_audioHandle == data.m_audioHandle)
+                        {
+                            m_playingSoundInfo.erase(m_playingSoundInfo.begin() + i);
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    RF_ASSERT(found, "We are trying to remove a sound that we have not played.");
+                    break;
+                }
+                case MessageType::ContextNumVoices:
+                {
+                    const Message::ContextNumVoicesData& data = *msg.GetContextNumVoicesData();
+                    m_numPlayingVoices = data.m_numVoices;
+                    break;
+                }
+                default: RF_FAIL("Message type not supported."); break;
             }
-            case MessageType::ContextNumVoices:
-            {
-                const Message::ContextNumVoicesData& data = *msg.GetContextNumVoicesData();
-                m_numPlayingVoices = data.m_numVoices;
-                break;
-            }
-            default: RF_FAIL("Message type not supported."); break;
         }
+
+        m_eventSystem->ProcessMessages(msg);
     }
 }
 
@@ -144,6 +154,11 @@ rf::MixerSystem* rf::Context::GetMixerSystem()
 rf::MusicSystem* rf::Context::GetMusicSystem()
 {
     return m_musicSystem;
+}
+
+rf::EventSystem* rf::Context::GetEventSystem()
+{
+    return m_eventSystem;
 }
 
 const rf::AudioSpec& rf::Context::GetAudioSpec() const

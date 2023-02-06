@@ -19,6 +19,7 @@ public:
     void Example7_MixGroups();
     void Example8_ViewPlayingSounds();
     void Example9_Music();
+    void Example10_Events();
 
     void StressTest();
     void FuzzTest();
@@ -99,6 +100,7 @@ private:
     rf::MixGroup* m_mixGroupDrums = nullptr;
     rf::MixGroup* m_mixGroupMusic = nullptr;
     rf::MixGroup* m_mixGroupTestSendTo = nullptr;
+    rf::MixGroup* m_mixGroupTestCreateDestroy = nullptr;
     rf::MixGroup* m_mixGroupMaster = nullptr;
 
     rf::SoundEffect m_soundEffectFootsteps;
@@ -132,6 +134,7 @@ private:
     float m_fuzzTestWaitTime = 0.0f;
     bool m_runStressTest = false;
     bool m_runFuzzTest = false;
+    bool m_printEventsToConsole = false;
 
     void RunStressTest(float dt);
     void RunFuzzTest(float dt);

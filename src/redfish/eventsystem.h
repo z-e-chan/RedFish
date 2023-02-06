@@ -24,24 +24,33 @@
 
 namespace rf
 {
-struct AudioData
+class CommandProcessor;
+struct Message;
+
+class EventSystem
 {
-    AudioData() = default;
-    AudioData(const AudioData&) = delete;
-    AudioData(AudioData&&) = delete;
-    AudioData& operator=(const AudioData&) = delete;
-    AudioData& operator=(AudioData&&) = delete;
-    ~AudioData() = default;
+public:
+    EventSystem(CommandProcessor* commands);
+    EventSystem(const EventSystem&) = delete;
+    EventSystem(EventSystem&&) = delete;
+    EventSystem& operator=(const EventSystem&) = delete;
+    EventSystem& operator=(EventSystem&&) = delete;
+    ~EventSystem() = default;
 
-    const char* m_name = nullptr;
-    float** m_arrayOfChannels = nullptr;
-    int m_numSamples = 0;
-    int m_numFrames = 0;
-    int m_numChannels = 0;
-    int m_referenceCount = 0;
+    void SetUserData(void* userData);
+    void RegisterOnBar(void (*onBar)(int bar, int beat, void* userData));
+    void RegisterOnBeat(void (*onBeat)(int bar, int beat, void* userData));
+    void RegisterOnMusicFinished(void (*onMusicFinished)(void* userData));
 
-    void Allocate(int numChannels, int numFrames, const float* sampleData);
-    void Allocate(const AudioData& audioData);
-    void Free();
+private:
+    CommandProcessor* m_commands = nullptr;
+    void* m_userData = nullptr;
+    void (*m_onBar)(int bar, int beat, void* userData) = nullptr;
+    void (*m_onBeat)(int bar, int beat, void* userData) = nullptr;
+    void (*m_onMusicFinished)(void* userData) = nullptr;
+
+    void ProcessMessages(const Message& message);
+
+    friend class Context;
 };
 }  // namespace rf

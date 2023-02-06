@@ -21,6 +21,8 @@
 // SOFTWARE.
 
 #pragma once
+#include <stdint.h>
+
 #include "assert.h"
 #include "defines.h"
 #include "identifiers.h"

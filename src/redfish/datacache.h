@@ -44,6 +44,9 @@ public:
     int GetAudioDataIndex(AudioHandle audioHandle) const;
     const AudioData* GetAudioData(AudioHandle audioHandle) const;
     const AudioData* GetAudioData(int index) const;
+    AudioHandle AssetExists(const char* path);
+    void IncrementReferenceCount(AudioHandle audioHandle);
+    bool DecrementReferenceCount(AudioHandle audioHandle);
 
 private:
     AudioHandle m_audioDataHandleLookupList[RF_MAX_AUDIO_DATA] = {};
