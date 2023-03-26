@@ -30,7 +30,7 @@
 #include "pluginutils.h"
 
 rf::ConvolverPlugin::ConvolverPlugin(Context* context, CommandProcessor* commands, MixGroupHandle mixGroupHandle, int mixGroupSlot, int pluginIndex)
-    : PluginBase(context, commands, mixGroupHandle, mixGroupSlot, pluginIndex)
+    : PluginBase(context, commands, mixGroupHandle, mixGroupSlot, pluginIndex, PluginBase::Type::Convolver)
 {
     RF_SEND_PLUGIN_CREATE_COMMAND(CreateConvolverDSPCommand);
 
@@ -130,4 +130,14 @@ float rf::ConvolverPlugin::GetIRVolumeDb(int index) const
 
     const float dB = Functions::AmplitudeToDecibel(m_amplitudes[index]);
     return dB;
+}
+
+void rf::ConvolverPlugin::ToJson(nlohmann::ordered_json&) const
+{
+    // TOOD: this is not supported.
+}
+
+void rf::ConvolverPlugin::FromJson(const nlohmann::ordered_json&)
+{
+    // TOOD: this is not supported.
 }

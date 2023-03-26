@@ -28,7 +28,7 @@
 #include "pluginutils.h"
 
 rf::LimiterPlugin::LimiterPlugin(Context* context, CommandProcessor* commands, MixGroupHandle mixGroupHandle, int mixGroupSlot, int pluginIndex)
-    : PluginBase(context, commands, mixGroupHandle, mixGroupSlot, pluginIndex)
+    : PluginBase(context, commands, mixGroupHandle, mixGroupSlot, pluginIndex, PluginBase::Type::Limiter)
 {
     RF_SEND_PLUGIN_CREATE_COMMAND(CreateLimiterDSPCommand);
 }
@@ -57,4 +57,14 @@ void rf::LimiterPlugin::SetThreshold(float threshold)
 float rf::LimiterPlugin::GetThreshold() const
 {
     return m_threshold;
+}
+
+void rf::LimiterPlugin::ToJson(nlohmann::ordered_json& json) const
+{
+    json["threshold"] = GetThreshold();
+}
+
+void rf::LimiterPlugin::FromJson(const nlohmann::ordered_json& json)
+{
+    SetThreshold(json.value("threshold", GetThreshold()));
 }

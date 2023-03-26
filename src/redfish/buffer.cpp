@@ -231,6 +231,26 @@ const float* rf::Buffer::GetAsFloatBuffer() const
 
 float rf::Buffer::GetMax() const
 {
+#if RF_USE_SSE
+    __m128 maxValue = _mm_setzero_ps();
+    __m128 negMaxValue = _mm_setzero_ps();
+    __m128i signMask = _mm_set1_epi32(0x80000000);
+    for (int i = 0; i < m_numSimdIterations; ++i)
+    {
+        __m128 value = m_buffer[i];
+        __m128 absValue = _mm_andnot_ps(*(__m128*)&signMask, value);
+        __m128 cmpMask = _mm_cmpgt_ps(absValue, maxValue);
+        maxValue = _mm_or_ps(_mm_and_ps(cmpMask, absValue), _mm_andnot_ps(cmpMask, maxValue));
+        cmpMask = _mm_cmpgt_ps(value, negMaxValue);
+        negMaxValue = _mm_or_ps(_mm_and_ps(cmpMask, value), _mm_andnot_ps(cmpMask, negMaxValue));
+    }
+    maxValue = _mm_max_ps(maxValue, negMaxValue);
+    __m128 permValue = _mm_permute_ps(maxValue, _MM_SHUFFLE(1, 0, 3, 2));
+    maxValue = _mm_max_ps(maxValue, permValue);
+    permValue = _mm_permute_ps(maxValue, _MM_SHUFFLE(2, 3, 0, 1));
+    maxValue = _mm_max_ps(maxValue, permValue);
+    return _mm_cvtss_f32(maxValue);
+#else
     const float* buffer = GetAsFloatBuffer();
     float max = 0.0f;
     for (int i = 0; i < m_size; ++i)
@@ -240,12 +260,27 @@ float rf::Buffer::GetMax() const
             max = buffer[i];
         }
     }
-
     return max;
+#endif
 }
 
 float rf::Buffer::GetAbsoluteMax() const
 {
+#if RF_USE_SSE
+    __m128 maxValue = _mm_setzero_ps();
+    for (int i = 0; i < m_numSimdIterations; ++i)
+    {
+        __m128 value = m_buffer[i];
+        __m128 absValue = _mm_andnot_ps(_mm_set1_ps(-0.0f), value);
+        __m128 cmpMask = _mm_cmpgt_ps(absValue, maxValue);
+        maxValue = _mm_or_ps(_mm_and_ps(cmpMask, absValue), _mm_andnot_ps(cmpMask, maxValue));
+    }
+    __m128 permValue = _mm_permute_ps(maxValue, _MM_SHUFFLE(1, 0, 3, 2));
+    maxValue = _mm_max_ps(maxValue, permValue);
+    permValue = _mm_permute_ps(maxValue, _MM_SHUFFLE(2, 3, 0, 1));
+    maxValue = _mm_max_ps(maxValue, permValue);
+    return _mm_cvtss_f32(maxValue);
+#else
     const float* buffer = GetAsFloatBuffer();
     float max = 0.0f;
     for (int i = 0; i < m_size; ++i)
@@ -257,8 +292,8 @@ float rf::Buffer::GetAbsoluteMax() const
             max = absValue;
         }
     }
-
     return max;
+#endif
 }
 
 void rf::Buffer::Allocate(int size)

@@ -63,6 +63,7 @@ public:
 
     void CreateMixGroup(const MixGroupState& state);
     void DestroyMixGroup(int mixGroupIndex);
+    void DestroyAllMixGroups();
     void Sum(void* buffer, MixItem* mixItems, int numMixItems, int bufferSize, Messenger* messenger);
     MixGroupInternal* MixGroupLookUp(MixGroupHandle mixGroupHandle, int* outIndex = nullptr);
     MixGroupInternal* MixGroupLookUp(int index);

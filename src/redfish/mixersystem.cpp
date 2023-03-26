@@ -22,12 +22,23 @@
 
 #include "mixersystem.h"
 
+#include "butterworthhighpassfilterplugin.h"
+#include "butterworthlowpassfilterplugin.h"
 #include "commandprocessor.h"
+#include "compressorplugin.h"
+#include "convolverplugin.h"
+#include "delayplugin.h"
 #include "functions.h"
+#include "gainplugin.h"
+#include "iir2highpassfilterplugin.h"
+#include "iir2lowpassfilterplugin.h"
+#include "limiterplugin.h"
 #include "message.h"
 #include "mixercommands.h"
 #include "mixgroup.h"
+#include "panplugin.h"
 #include "pluginbase.h"
+#include "positioningplugin.h"
 #include "send.h"
 #include "stinger.h"
 
@@ -35,39 +46,49 @@ rf::MixerSystem::MixerSystem(Context* context, CommandProcessor* commands)
     : m_context(context)
     , m_commands(commands)
 {
-    m_mixGroupState = Allocator::AllocateArray<MixGroupState>("MixGroupState", RF_MAX_MIX_GROUPS);
-    m_mixGroups = Allocator::AllocateArray<MixGroup>("MixGroups", RF_MAX_MIX_GROUPS, nullptr, nullptr, nullptr);
-    m_sends = Allocator::AllocateArray<Send>("Sends", RF_MAX_MIX_GROUPS * RF_MAX_MIX_GROUP_SENDS, nullptr, -1, MixGroupHandle());
-    m_plugins = Allocator::AllocateArray<PluginBase*>("PluginBase", RF_MAX_MIX_GROUPS * RF_MAX_MIX_GROUP_PLUGINS);
-
-    // Create master mix group
-    m_masterMixGroup = Allocator::Allocate<MixGroup>("MasterMixGroup", m_context, m_commands, this);
-    CreateMixGroupInternal(m_masterMixGroup->GetMixGroupHandle());
+    Allocate();
 }
 
 rf::MixerSystem::~MixerSystem()
 {
-    Allocator::Deallocate<MixGroup>(&m_masterMixGroup);
-    Allocator::DeallocateArray<MixGroupState>(&m_mixGroupState, RF_MAX_MIX_GROUPS);
-    Allocator::DeallocateArray<MixGroup>(&m_mixGroups, RF_MAX_MIX_GROUPS);
-    Allocator::DeallocateArray<Send>(&m_sends, RF_MAX_MIX_GROUPS * RF_MAX_MIX_GROUP_SENDS);
-
-    for (int i = 0; i < RF_MAX_MIX_GROUPS * RF_MAX_MIX_GROUP_PLUGINS; ++i)
-    {
-        Allocator::Deallocate<PluginBase>(&m_plugins[i]);
-    }
-
-    Allocator::DeallocateArray<PluginBase*>(&m_plugins, RF_MAX_MIX_GROUPS * RF_MAX_MIX_GROUP_PLUGINS);
+    Free();
 }
 
-rf::MixGroup* rf::MixerSystem::CreateMixGroup()
+bool rf::MixerSystem::CanCreateMixGroup(const char* name)
 {
+    for (int i = 0; i < RF_MAX_MIX_GROUPS; ++i)
+    {
+        if (m_mixGroups[i] && strcmp(name, m_mixGroups[i].GetName()) == 0)
+        {
+            return false;
+        }
+    }
+
+    for (int i = 0; i < RF_MAX_MIX_GROUPS; ++i)
+    {
+        if (!m_mixGroups[i])
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+rf::MixGroup* rf::MixerSystem::CreateMixGroup(const char* name)
+{
+    if (!CanCreateMixGroup(name))
+    {
+        RF_FAIL("Cannot create mix group");
+        return nullptr;
+    }
+
     MixGroup* mixGroup = nullptr;
     for (int i = 0; i < RF_MAX_MIX_GROUPS; ++i)
     {
         if (!m_mixGroups[i])
         {
-            mixGroup = new (m_mixGroups + i) MixGroup(m_context, m_commands, this);
+            mixGroup = new (m_mixGroups + i) MixGroup(m_context, m_commands, this, name);
             break;
         }
     }
@@ -92,7 +113,7 @@ void rf::MixerSystem::DestroyMixGroup(MixGroup** mixGroup)
 
     MixGroup* group = *mixGroup;
     const MixGroupHandle mixGroupHandle = group->GetMixGroupHandle();
-    
+
     // Destroy Sends
     {
         const MixGroupState& state = GetMixGroupState(mixGroupHandle);
@@ -152,7 +173,7 @@ void rf::MixerSystem::DestroyMixGroup(MixGroup** mixGroup)
     {
         if (m_mixGroups[i].GetMixGroupHandle() == mixGroupHandle)
         {
-            new (m_mixGroups + i) MixGroup(nullptr, nullptr, nullptr);
+            new (m_mixGroups + i) MixGroup(nullptr, nullptr, nullptr, nullptr);
             break;
         }
     }
@@ -162,6 +183,11 @@ void rf::MixerSystem::DestroyMixGroup(MixGroup** mixGroup)
 
 rf::MixGroup* rf::MixerSystem::GetMixGroup(MixGroupHandle mixGroupHandle)
 {
+    if (m_masterMixGroup->GetMixGroupHandle() == mixGroupHandle)
+    {
+        return m_masterMixGroup;
+    }
+
     for (int i = 0; i < RF_MAX_MIX_GROUPS; ++i)
     {
         if (m_mixGroups[i].GetMixGroupHandle() == mixGroupHandle)
@@ -172,6 +198,50 @@ rf::MixGroup* rf::MixerSystem::GetMixGroup(MixGroupHandle mixGroupHandle)
 
     RF_FAIL("Could not find mix group");
     return nullptr;
+}
+
+const rf::MixGroup* rf::MixerSystem::GetMixGroup(MixGroupHandle mixGroupHandle) const
+{
+    if (m_masterMixGroup->GetMixGroupHandle() == mixGroupHandle)
+    {
+        return m_masterMixGroup;
+    }
+
+    for (int i = 0; i < RF_MAX_MIX_GROUPS; ++i)
+    {
+        if (m_mixGroups[i].GetMixGroupHandle() == mixGroupHandle)
+        {
+            return &m_mixGroups[i];
+        }
+    }
+
+    RF_FAIL("Could not find mix group");
+    return nullptr;
+}
+
+rf::MixGroup* rf::MixerSystem::GetMixGroup(const char* name)
+{
+    if (strcmp(m_masterMixGroup->GetName(), name) == 0)
+    {
+        return m_masterMixGroup;
+    }
+
+    for (int i = 0; i < RF_MAX_MIX_GROUPS; ++i)
+    {
+        if (strcmp(m_mixGroups[i].GetName(), name) == 0)
+        {
+            return &m_mixGroups[i];
+        }
+    }
+
+    RF_FAIL("Could not find mix group");
+    return nullptr;
+}
+
+rf::MixGroup* rf::MixerSystem::GetMixGroup(int index)
+{
+    RF_ASSERT(index >= 0 && index < RF_MAX_MIX_GROUPS, "Index out of bounds");
+    return &m_mixGroups[index];
 }
 
 rf::MixGroup* rf::MixerSystem::GetMasterMixGroup() const
@@ -208,6 +278,44 @@ void rf::MixerSystem::FadeMixGroups(const MixGroup** mixGroups, int numMixGroups
     FadeMixGroups(mixGroups, numMixGroups, volumeDb, sync, duration, nullptr);
 }
 
+void rf::MixerSystem::Allocate()
+{
+    Free();
+    m_mixGroupState = Allocator::AllocateArray<MixGroupState>("MixGroupState", RF_MAX_MIX_GROUPS);
+    m_mixGroups = Allocator::AllocateArray<MixGroup>("MixGroups", RF_MAX_MIX_GROUPS, nullptr, nullptr, nullptr, nullptr);
+    m_sends = Allocator::AllocateArray<Send>("Sends", RF_MAX_MIX_GROUPS * RF_MAX_MIX_GROUP_SENDS, nullptr, -1, MixGroupHandle());
+    m_plugins = Allocator::AllocateArray<PluginBase*>("PluginBase", RF_MAX_MIX_GROUPS * RF_MAX_MIX_GROUP_PLUGINS);
+}
+
+void rf::MixerSystem::Free()
+{
+    Allocator::Deallocate<MixGroup>(&m_masterMixGroup);
+    Allocator::DeallocateArray<MixGroupState>(&m_mixGroupState, RF_MAX_MIX_GROUPS);
+    Allocator::DeallocateArray<MixGroup>(&m_mixGroups, RF_MAX_MIX_GROUPS);
+    Allocator::DeallocateArray<Send>(&m_sends, RF_MAX_MIX_GROUPS * RF_MAX_MIX_GROUP_SENDS);
+
+    if (m_plugins)
+    {
+        for (int i = 0; i < RF_MAX_MIX_GROUPS * RF_MAX_MIX_GROUP_PLUGINS; ++i)
+        {
+            Allocator::Deallocate<PluginBase>(&m_plugins[i]);
+        }
+
+        Allocator::DeallocateArray<PluginBase*>(&m_plugins, RF_MAX_MIX_GROUPS * RF_MAX_MIX_GROUP_PLUGINS);
+    }
+
+    AudioCommand cmd;
+    DestroyAllMixGroupsCommand& data = EncodeAudioCommand<DestroyAllMixGroupsCommand>(&cmd);
+    m_commands->Add(cmd);
+}
+
+void rf::MixerSystem::CreateMasterMixGroup()
+{
+    // Create master mix group
+    m_masterMixGroup = Allocator::Allocate<MixGroup>("MasterMixGroup", m_context, m_commands, this, "Master");
+    CreateMixGroupInternal(m_masterMixGroup->GetMixGroupHandle());
+}
+
 int rf::MixerSystem::GetMixGroupIndex(MixGroupHandle mixGroupHandle) const
 {
     for (int i = 0; i < m_numMixGroupState; ++i)
@@ -242,14 +350,25 @@ void rf::MixerSystem::CreateMixGroupInternal(MixGroupHandle mixGroupHandle)
     state.m_outputMixGroupHandle = masterMixGroupHandle;
     state.m_priority = maxPriority;
     state.m_isMaster = mixGroupHandle == masterMixGroupHandle;
+    state.m_volumeDb = 0.0f;
     m_mixGroupState[m_numMixGroupState++] = state;
 
     Sort();
 
-    AudioCommand cmd;
-    CreateMixGroupCommand& data = EncodeAudioCommand<CreateMixGroupCommand>(&cmd);
-    data.m_mixGroupState = state;
-    m_commands->Add(cmd);
+    {
+        AudioCommand cmd;
+        CreateMixGroupCommand& data = EncodeAudioCommand<CreateMixGroupCommand>(&cmd);
+        data.m_mixGroupState = state;
+        m_commands->Add(cmd);
+    }
+
+    {
+        AudioCommand cmd;
+        SetMixGroupAmplitudeCommand& data = EncodeAudioCommand<SetMixGroupAmplitudeCommand>(&cmd);
+        data.m_mixGroupHandle = mixGroupHandle;
+        data.m_amplitude = Functions::DecibelToAmplitude(state.m_volumeDb);
+        m_commands->Add(cmd);
+    }
 }
 
 rf::MixGroupState& rf::MixerSystem::GetMixGroupState(MixGroupHandle mixGroupHandle)
@@ -348,6 +467,12 @@ rf::Send* rf::MixerSystem::CreateSend(MixGroupHandle sendToMixGroupHandle, int* 
     return nullptr;
 }
 
+rf::Send* rf::MixerSystem::GetSend(int index)
+{
+    RF_ASSERT(index >= 0 && index < RF_MAX_MIX_GROUPS * RF_MAX_MIX_GROUP_SENDS, "Index out of bounds");
+    return m_sends[index] ? &m_sends[index] : nullptr;
+}
+
 int rf::MixerSystem::DestroySend(const Send* send)
 {
     const SendHandle sendHandle = send->GetSendHandle();
@@ -408,6 +533,18 @@ rf::PluginBase** rf::MixerSystem::GetPluginBaseForDeletion(const PluginBase* plu
     return nullptr;
 }
 
+rf::PluginBase* rf::MixerSystem::GetPlugin(int pluginIndex)
+{
+    RF_ASSERT(pluginIndex >= 0 && pluginIndex < RF_MAX_MIX_GROUPS * RF_MAX_MIX_GROUP_PLUGINS, "Index out of bounds");
+    return m_plugins[pluginIndex];
+}
+
+const rf::PluginBase* rf::MixerSystem::GetPlugin(int pluginIndex) const
+{
+    RF_ASSERT(pluginIndex >= 0 && pluginIndex < RF_MAX_MIX_GROUPS * RF_MAX_MIX_GROUP_PLUGINS, "Index out of bounds");
+    return m_plugins[pluginIndex];
+}
+
 void rf::MixerSystem::Sort()
 {
     std::sort(m_mixGroupState, m_mixGroupState + m_numMixGroupState, [](const MixGroupState& a, const MixGroupState& b) {
@@ -434,5 +571,199 @@ bool rf::MixerSystem::ProcessMessages(const Message& message)
             return true;
         }
         default: return false;
+    }
+}
+
+void rf::to_json(nlohmann::ordered_json& json, const MixerSystem& object)
+{
+    const auto GetName = [&object](MixGroupHandle mixGroupHandle) -> const char* { return object.GetMixGroup(mixGroupHandle)->GetName(); };
+
+    nlohmann::ordered_json j;
+
+    j["state"] = {};
+    for (int i = 0; i < object.m_numMixGroupState; ++i)
+    {
+        nlohmann::ordered_json stateJson = object.m_mixGroupState[i];
+        stateJson["name"] = GetName(object.m_mixGroupState[i].m_mixGroupHandle);
+        stateJson["output"] = GetName(object.m_mixGroupState[i].m_outputMixGroupHandle);
+        j["state"].emplace_back(stateJson);
+    }
+
+    j["sends"] = {};
+    for (int i = 0; i < object.m_numMixGroupState; ++i)
+    {
+        for (int k = 0; k < RF_MAX_MIX_GROUP_SENDS; ++k)
+        {
+            const int sendIndex = object.m_mixGroupState[i].m_sendSlots[k];
+            if (sendIndex == -1)
+            {
+                continue;
+            }
+
+            const Send* send = &object.m_sends[sendIndex];
+            const char* sendFromName = GetName(object.m_mixGroupState[i].m_mixGroupHandle);
+            const char* sendToName = GetName(send->GetSendToMixGroupHandle());
+
+            nlohmann::ordered_json sendJson;
+            sendJson["fromMixGroup"] = sendFromName;
+            sendJson["toMixGroup"] = sendToName;
+            sendJson["volumeDb"] = send->GetVolumeDb();
+            sendJson["slot"] = k;
+            j["sends"].emplace_back(sendJson);
+        }
+    }
+
+    j["plugins"] = {};
+    for (int i = 0; i < object.m_numMixGroupState; ++i)
+    {
+        for (int k = 0; k < RF_MAX_MIX_GROUP_PLUGINS; ++k)
+        {
+            const int pluginIndex = object.m_mixGroupState[i].m_pluginSlots[k];
+            if (pluginIndex == -1)
+            {
+                continue;
+            }
+
+            const char* mixGroupName = GetName(object.m_mixGroupState[i].m_mixGroupHandle);
+            const PluginBase* plugin = object.GetPlugin(pluginIndex);
+
+            nlohmann::ordered_json pluginJson;
+            pluginJson["mixGroup"] = mixGroupName;
+            pluginJson["slot"] = k;
+            pluginJson["pluginType"] = plugin->GetType();
+
+            nlohmann::ordered_json pluginDataJson;
+            pluginDataJson["bypass"] = plugin->GetBypass();
+            plugin->ToJson(pluginDataJson);
+            pluginJson["pluginData"] = pluginDataJson;
+            j["plugins"].emplace_back(pluginJson);
+        }
+    }
+
+    json = j;
+}
+
+void rf::from_json(const nlohmann::ordered_json& json, MixerSystem& object)
+{
+    object.Free();
+    object.Allocate();
+
+    const auto& stateArray = json["state"];
+    const int numState = static_cast<int>(stateArray.size());
+
+    // 1. Make sure that master is created first.
+    for (int i = 0; i < numState; ++i)
+    {
+        const auto& data = stateArray.at(i);
+        const std::string name = data["name"];
+        const float volumeDb = data["volumeDb"];
+        const bool isMaster = data["isMaster"];
+
+        if (!isMaster)
+        {
+            continue;
+        }
+
+        object.CreateMasterMixGroup();
+        object.m_masterMixGroup->SetVolumeDb(volumeDb);
+        break;
+    }
+
+    // 2. Create all mix groups.
+    for (int i = 0; i < numState; ++i)
+    {
+        const auto& data = stateArray.at(i);
+        const std::string name = data["name"];
+        const float volumeDb = data["volumeDb"];
+        const bool isMaster = data["isMaster"];
+
+        if (isMaster)
+        {
+            continue;
+        }
+
+        MixGroup* mixGroup = object.CreateMixGroup(name.c_str());
+        mixGroup->SetVolumeDb(volumeDb);
+    }
+
+    // 3. Assign Outputs
+    for (int i = 0; i < numState; ++i)
+    {
+        const auto& data = stateArray.at(i);
+        const std::string name = data["name"];
+        const std::string outputName = data["output"];
+        const bool isMaster = data["isMaster"];
+        if (isMaster)
+        {
+            continue;
+        }
+
+        MixGroup* mixGroup = object.GetMixGroup(name.c_str());
+        MixGroup* output = object.GetMixGroup(outputName.c_str());
+        mixGroup->SetOutputMixGroup(output);
+    }
+
+    // 4. Create sends
+    {
+        const auto& sendArray = json["sends"];
+        const int numSends = static_cast<int>(sendArray.size());
+
+        for (int i = 0; i < numSends; ++i)
+        {
+            const auto& data = sendArray.at(i);
+            const std::string fromName = data["fromMixGroup"];
+            const std::string toName = data["toMixGroup"];
+            const float volumeDb = data["volumeDb"];
+            const int slot = data["slot"];
+
+            MixGroup* from = object.GetMixGroup(fromName.c_str());
+            MixGroup* to = object.GetMixGroup(toName.c_str());
+            Send* send = from->CreateSend(to, slot);
+            send->SetVolumeDb(volumeDb);
+        }
+    }
+
+    // 5. Create Plugin-ins
+    {
+        const auto& pluginArray = json["plugins"];
+        const int numPlugins = static_cast<int>(pluginArray.size());
+
+        for (int i = 0; i < numPlugins; ++i)
+        {
+            const auto& data = pluginArray.at(i);
+            const std::string mixGroupName = data["mixGroup"];
+            const int slot = data["slot"];
+            const int type = data["pluginType"];
+            const auto pluginData = data["pluginData"];
+
+            MixGroup* mixGroup = object.GetMixGroup(mixGroupName.c_str());
+            const PluginBase::Type pluginType = static_cast<PluginBase::Type>(type);
+            PluginBase* plugin = nullptr;
+
+            static_assert(static_cast<int>(PluginBase::Type::Version) == 1, "Update switch");
+
+            switch (pluginType)
+            {
+                case PluginBase::Type::ButterworthHighpassFilter: plugin = mixGroup->CreatePlugin<ButterworthHighpassFilterPlugin>(slot); break;
+                case PluginBase::Type::ButterworthLowpassFilter: plugin = mixGroup->CreatePlugin<ButterworthLowpassFilterPlugin>(slot); break;
+                case PluginBase::Type::Compressor: plugin = mixGroup->CreatePlugin<CompressorPlugin>(slot); break;
+                case PluginBase::Type::Convolver: plugin = mixGroup->CreatePlugin<ConvolverPlugin>(slot); break;
+                case PluginBase::Type::Delay: plugin = mixGroup->CreatePlugin<DelayPlugin>(slot); break;
+                case PluginBase::Type::Gain: plugin = mixGroup->CreatePlugin<GainPlugin>(slot); break;
+                case PluginBase::Type::IIR2HighpassFilter: plugin = mixGroup->CreatePlugin<IIR2HighpassFilterPlugin>(slot); break;
+                case PluginBase::Type::IIR2LowpassFilter: plugin = mixGroup->CreatePlugin<IIR2LowpassFilterPlugin>(slot); break;
+                case PluginBase::Type::Limiter: plugin = mixGroup->CreatePlugin<LimiterPlugin>(slot); break;
+                case PluginBase::Type::Pan: plugin = mixGroup->CreatePlugin<PanPlugin>(slot); break;
+                case PluginBase::Type::Positioning: plugin = mixGroup->CreatePlugin<PositioningPlugin>(slot); break;
+                case PluginBase::Type::Invalid:
+                default: RF_FAIL("Could not deserialize plug-in"); break;
+            }
+
+            if (plugin)
+            {
+                plugin->FromJson(pluginData);
+                plugin->SetBypass(pluginData["bypass"]);
+            }
+        }
     }
 }

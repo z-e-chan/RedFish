@@ -53,7 +53,7 @@
 // Set all of the values to 0 to disable SIMD.
 #define RF_USE_AVX 0
 #define RF_USE_AVX_512 0
-#define RF_USE_SSE 0
+#define RF_USE_SSE 1
 
 // ------------------------------------------------------------------------------------------------
 // Mixing

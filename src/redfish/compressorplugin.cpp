@@ -29,7 +29,7 @@
 #include "pluginutils.h"
 
 rf::CompressorPlugin::CompressorPlugin(Context* context, CommandProcessor* commands, MixGroupHandle mixGroupHandle, int mixGroupSlot, int pluginIndex)
-    : PluginBase(context, commands, mixGroupHandle, mixGroupSlot, pluginIndex)
+    : PluginBase(context, commands, mixGroupHandle, mixGroupSlot, pluginIndex, PluginBase::Type::Compressor)
 {
     RF_SEND_PLUGIN_CREATE_COMMAND(CreateCompressorDSPCommand);
 }
@@ -142,4 +142,22 @@ void rf::CompressorPlugin::SetRelease(float release)
 float rf::CompressorPlugin::GetRelease() const
 {
     return m_release;
+}
+
+void rf::CompressorPlugin::ToJson(nlohmann::ordered_json& json) const
+{
+    json["threshold"] = GetThreshold();
+    json["ratio"] = GetRatio();
+    json["makeUpGainDb"] = GetMakeUpGainDb();
+    json["attack"] = GetAttack();
+    json["release"] = GetRelease();
+}
+
+void rf::CompressorPlugin::FromJson(const nlohmann::ordered_json& json)
+{
+    SetThreshold(json.value("threshold", GetThreshold()));
+    SetRatio(json.value("ratio", GetRatio()));
+    SetMakeUpGainDb(json.value("makeUpGainDb", GetMakeUpGainDb()));
+    SetAttack(json.value("attack", GetAttack()));
+    SetRelease(json.value("release", GetRelease()));
 }

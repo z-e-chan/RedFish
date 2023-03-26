@@ -40,6 +40,9 @@ public:
     void SetPositioningParameters(const PositioningParameters& parameters);
     const PositioningParameters& GetPositioningParameters() const;
 
+    void ToJson(nlohmann::ordered_json& json) const override;
+    void FromJson(const nlohmann::ordered_json& json) override;
+
 private:
     PositioningParameters m_positioningParameters;
 };

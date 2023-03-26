@@ -22,6 +22,9 @@
 
 #include "context.h"
 
+#include <external/nlohmann/json.hpp>
+#include <fstream>
+
 #include "assetsystem.h"
 #include "audiocallback.h"
 #include "audiodata.h"
@@ -30,6 +33,7 @@
 #include "loadcommands.h"
 #include "mixersystem.h"
 #include "musicsystem.h"
+#include "version.h"
 
 rf::Context::Context(const Config& config)
     : m_spec {config.m_bufferSize, config.m_sampleRate, config.m_channels}
@@ -39,6 +43,7 @@ rf::Context::Context(const Config& config)
     m_timeline = Allocator::Allocate<AudioTimeline>("AudioTimeline", m_config.m_channels, m_config.m_bufferSize, m_config.m_sampleRate);
     m_assetSystem = Allocator::Allocate<AssetSystem>("AssetSystem", &m_commandProcessor);
     m_mixerSystem = Allocator::Allocate<MixerSystem>("MixerSystem", this, &m_commandProcessor);
+    m_mixerSystem->CreateMasterMixGroup();
     m_musicSystem = Allocator::Allocate<MusicSystem>("MusicSystem", &m_commandProcessor, m_assetSystem);
     m_eventSystem = Allocator::Allocate<EventSystem>("EventSystem", &m_commandProcessor);
     m_playingSoundInfo.reserve(RF_MAX_VOICES);
@@ -174,6 +179,42 @@ int rf::Context::GetNumPlayingVoices() const
 const std::vector<rf::PlayingSoundInfo>& rf::Context::GetPlayingSoundInfo() const
 {
     return m_playingSoundInfo;
+}
+
+void rf::Context::Serialize() const
+{
+    const Version& version = GetVersion();
+
+    nlohmann::ordered_json json;
+
+    json["version"] = {
+        {"major", version.m_major},
+        {"minor", version.m_minor},
+        {"patch", version.m_patch},
+    };
+    json["mixer"] = *m_mixerSystem;
+
+    std::ofstream file("redfish.json");
+    file << std::setw(4) << json;
+}
+
+void rf::Context::Deserialize(const char* path)
+{
+    std::ifstream ifs(path);
+    nlohmann::ordered_json json = nlohmann::json::parse(ifs);
+
+    // Version
+    {
+        const auto versionJson = json["version"];
+        const Version version = Version(versionJson["major"], versionJson["minor"], versionJson["patch"]);
+    }
+
+    // Mixer
+    {
+        Allocator::Deallocate<MixerSystem>(&m_mixerSystem);
+        m_mixerSystem = Allocator::Allocate<MixerSystem>("MixerSystem", this, &m_commandProcessor);
+        from_json(json["mixer"], *m_mixerSystem);
+    }
 }
 
 void rf::Context::OnAudioCallback(float* buffer, int size)

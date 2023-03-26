@@ -32,7 +32,7 @@ rf::PositioningPlugin::PositioningPlugin(Context* context,
                                          MixGroupHandle mixGroupHandle,
                                          int mixGroupSlot,
                                          int pluginIndex)
-    : PluginBase(context, commands, mixGroupHandle, mixGroupSlot, pluginIndex)
+    : PluginBase(context, commands, mixGroupHandle, mixGroupSlot, pluginIndex, PluginBase::Type::Positioning)
 {
     RF_SEND_PLUGIN_CREATE_COMMAND(CreatePositioningDSPCommand);
 }
@@ -66,4 +66,29 @@ void rf::PositioningPlugin::SetPositioningParameters(const PositioningParameters
 const rf::PositioningParameters& rf::PositioningPlugin::GetPositioningParameters() const
 {
     return m_positioningParameters;
+}
+void rf::PositioningPlugin::ToJson(nlohmann::ordered_json& json) const
+{
+    json["distanceCurveType"] = m_positioningParameters.m_distanceCurveType;
+    json["panAngle"] = m_positioningParameters.m_panAngle;
+    json["currentDistance"] = m_positioningParameters.m_currentDistance;
+    json["minDistance"] = m_positioningParameters.m_minDistance;
+    json["maxDistance"] = m_positioningParameters.m_maxDistance;
+    json["maxAttenuationDb"] = m_positioningParameters.m_maxAttenuationDb;
+    json["maxHpfCutoff"] = m_positioningParameters.m_maxHpfCutoff;
+    json["maxLpfCutoff"] = m_positioningParameters.m_maxLpfCutoff;
+    json["enable"] = m_positioningParameters.m_enable;
+}
+
+void rf::PositioningPlugin::FromJson(const nlohmann::ordered_json& json)
+{
+    m_positioningParameters.m_distanceCurveType = json.value("distanceCurveType", PositioningParameters::DistanceCurve::Linear);
+    m_positioningParameters.m_panAngle = json.value("panAngle", 0.0f);
+    m_positioningParameters.m_currentDistance = json.value("currentDistance", 0.0f);
+    m_positioningParameters.m_minDistance = json.value("minDistance", 0.0f);
+    m_positioningParameters.m_maxDistance = json.value("maxDistance", 0.0f);
+    m_positioningParameters.m_maxAttenuationDb = json.value("maxAttenuationDb", 0.0f);
+    m_positioningParameters.m_maxHpfCutoff = json.value("maxHpfCutoff", 20.0f);
+    m_positioningParameters.m_maxLpfCutoff = json.value("maxLpfCutoff", 20000.0f);
+    m_positioningParameters.m_enable = json.value("enable", false);
 }

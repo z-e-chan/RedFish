@@ -41,6 +41,9 @@ public:
     void SetFeedback(float feedback);
     float GetFeedback() const;
 
+    void ToJson(nlohmann::ordered_json& json) const override;
+    void FromJson(const nlohmann::ordered_json& json) override;
+
 private:
     float m_delay = 0;
     float m_feedback = 0;
