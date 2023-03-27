@@ -624,13 +624,17 @@ void rf::to_json(nlohmann::ordered_json& json, const MixerSystem& object)
                 continue;
             }
 
-            const char* mixGroupName = GetName(object.m_mixGroupState[i].m_mixGroupHandle);
             const PluginBase* plugin = object.GetPlugin(pluginIndex);
+            const PluginBase::Type type = plugin->GetType();
+            if (type == PluginBase::Type::Convolver)
+            {
+                continue;
+            }
 
             nlohmann::ordered_json pluginJson;
-            pluginJson["mixGroup"] = mixGroupName;
+            pluginJson["mixGroup"] = GetName(object.m_mixGroupState[i].m_mixGroupHandle);
             pluginJson["slot"] = k;
-            pluginJson["pluginType"] = plugin->GetType();
+            pluginJson["pluginType"] = type;
 
             nlohmann::ordered_json pluginDataJson;
             pluginDataJson["bypass"] = plugin->GetBypass();

@@ -125,15 +125,13 @@ void rf::MixerView::Refresh()
     m_mixerSystem = m_context->GetMixerSystem();
 
     int lastDrawOrder = -1;
-    for (int i = 0; i < RF_MAX_MIX_GROUPS; ++i)
-    {
-        MixGroup* mixGroup = m_mixerSystem->GetMixGroup(i);
 
+    const auto Do = [this, &lastDrawOrder](MixGroup* mixGroup, int drawOrder) {
         if (*mixGroup)
         {
             MixGroupEditorState& editorState = m_editorState.emplace_back();
             editorState.m_mixGroup = mixGroup;
-            editorState.m_drawOrder = i;
+            editorState.m_drawOrder = drawOrder;
 
             // Check for sends
             for (int j = 0; j < RF_MAX_MIX_GROUP_SENDS; ++j)
@@ -220,13 +218,17 @@ void rf::MixerView::Refresh()
                 }
             }
 
-            lastDrawOrder = i;
+            lastDrawOrder = drawOrder;
         }
+    };
+
+    for (int i = 0; i < RF_MAX_MIX_GROUPS; ++i)
+    {
+        MixGroup* mixGroup = m_mixerSystem->GetMixGroup(i);
+        Do(mixGroup, i);
     }
 
-    MixGroupEditorState& editorState = m_editorState.emplace_back();
-    editorState.m_mixGroup = m_mixerSystem->GetMasterMixGroup();
-    editorState.m_drawOrder = lastDrawOrder + 1;
+    Do(m_mixerSystem->GetMasterMixGroup(), lastDrawOrder + 1);
 }
 
 void rf::MixerView::Update()
@@ -354,11 +356,25 @@ void rf::MixerView::VisibiltiyPane()
         {
             if (m_mixerSystem->CanCreateMixGroup(s_name))
             {
-                m_mixerSystem->CreateMixGroup(s_name);
+                MixGroup* mixGroup = m_mixerSystem->CreateMixGroup(s_name);
                 m_actions->DeleteActions();
-                Refresh();
                 ImGui::CloseCurrentPopup();
                 s_name[0] = '\0';
+
+                int minDrawOrder = INT_MAX;
+                for (const MixGroupEditorState& state : m_editorState)
+                {
+                    if (state.m_drawOrder < minDrawOrder)
+                    {
+                        minDrawOrder = state.m_drawOrder;
+                    }
+                }
+                minDrawOrder = -1;
+
+                MixGroupEditorState& editorState = m_editorState.emplace_back();
+                editorState.m_mixGroup = mixGroup;
+                editorState.m_drawOrder = minDrawOrder;
+                SortEditorState();
             }
         }
         ImGui::SetItemDefaultFocus();
@@ -384,9 +400,24 @@ void rf::MixerView::VisibiltiyPane()
         if (ImGui::Button("OK", ImVec2(120, 0)))
         {
             MixGroup* toDelete = m_mixerSystem->GetMixGroup(GetEditorState(s_index).m_mixGroup->GetMixGroupHandle());
+            for (int i = 0; i < m_editorState.size(); ++i)
+            {
+                MixGroupEditorState& state = m_editorState[i];
+                if (state.m_mixGroup == toDelete)
+                {
+                    for (int j = 0; j < RF_MAX_MIX_GROUP_SENDS; ++j)
+                    {
+                        delete state.m_plugins[j];
+                        state.m_plugins[j] = nullptr;
+                    }
+                    m_editorState.erase(m_editorState.begin() + i);
+                    SortEditorState();
+                    break;
+                }
+            }
+
             m_mixerSystem->DestroyMixGroup(&toDelete);
             m_actions->DeleteActions();
-            Refresh();
             ImGui::CloseCurrentPopup();
             s_index = 0;
         }
