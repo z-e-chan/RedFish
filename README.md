@@ -1,9 +1,9 @@
 ![alt text](https://github.com/z-e-chan/RedFish/blob/master/redfish.PNG?raw=true)
 
 # About
-RedFish is an audio engine written in C++ that has been designed for use in real-time applications. As such, RedFish is intended to be used on a dedicated audio thread. RedFish does not allocate or use mutexes during its runtime. Because of this, RedFish preallocates everything it needs during construction. You can modify the amount of data being allocated using the defines in `src/redfish/defines.h`.
+RedFish is a powerful and efficient audio engine designed for real-time applications. Written in C++, it is intended to be used on a dedicated audio thread, ensuring optimal performance. RedFish does not allocate or use mutexes during runtime. Instead, it preallocates everything it needs during construction.
 
-Additionally, you can provide RedFish with custom a custom allocator and dealloctor if you wish.
+RedFish offers the ability to modify the amount of data being allocated using the defines found in `src/redfish/defines.h`. Additionally, you can provide your own custom allocator and deallocator.
 
 RedFish’s mission is to provide an easy to use audio engine that supports a variety of features to enrich your application’s audio experience while being performant enough to support real-time usage in applications such as game development.
 
