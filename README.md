@@ -1,22 +1,20 @@
 # About
-RedFish is an audio engine written in C++ that has been designed for use in real-time applications. As such, RedFish is intended to be used on a dedicated audio thread; and, RedFish does not allocate or use mutexes during its runtime.
-
-Because RedFish does not allocate during it's runtime, it preallocates everything it needs during construction.
-You can modify the amount of data being allocated using the defines in `src/redfish/defines.h`.
+RedFish is an audio engine written in C++ that has been designed for use in real-time applications. As such, RedFish is intended to be used on a dedicated audio thread. RedFish does not allocate or use mutexes during its runtime. Because of this, RedFish preallocates everything it needs during construction. You can modify the amount of data being allocated using the defines in `src/redfish/defines.h`.
 
 Additionally, you can provide RedFish with custom a custom allocator and dealloctor if you wish.
 
-RedFish’s mission is to provide an easy to use audio engine that supports a variety of features to enrich your application’s audio experience while being performant enough to support real-time usage.
+RedFish’s mission is to provide an easy to use audio engine that supports a variety of features to enrich your application’s audio experience while being performant enough to support real-time usage in applications such as game development.
 
 RedFish is licensed under the MIT license.
 
 # Requirements
-- At this time, RedFish only support stereo (2 channels) projects and does not support any form of surround sound.
+- At this time, RedFish only supports stereo (2 channels) playback.
 - RedFish does not communicate with the hardware layer. Your project must provide an audio callback.
 - C++ 17
 
 # Features
 - Supports both WAV and FLAC files.
+- Interactive music supporting both layer mixing and musically-synced transitions.
 - Sound variation playback with Sound Effects.
 - Mixing with mix groups, output routing, and sends.
 - A variety of plug-ins including:
@@ -27,7 +25,6 @@ RedFish is licensed under the MIT license.
   - Convolution
   - IIR2 HP/LP Filters
   - Butterworth HP/LP Filters
-- Interactive music supporting both layer mixing and musically-synced transitions.
 
 # Integration
 
