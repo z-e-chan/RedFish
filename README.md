@@ -28,11 +28,19 @@ RedFish is licensed under the MIT license.
   - IIR2 HP/LP Filters
   - Butterworth HP/LP Filters
 
+# Editor
+
+RedFish offers an editor that allows you to mix audio in real time. You can use the editor to save a JSON representation of the mixer, which can then be deserialized. Currently, the convolver plugin does not support serialization. Therefore, any convolvers must be created on a mix group after deserialization.
+
 # Integration
 
 RedFish is simple to integrate into your project. Everything you need is in the `src` folder. Just download the latest release and put the contents of the `src` somewhere accessible to your project.
 
-Note that RedFish does include external code which is covered in the next section.
+For simplicity, you can just include `src/redfish/redfishapi.h` where ever you need to use RedFish.
+
+The editor's source code lives in 'editor' folder.
+
+Note that RedFish and the editor does include external code which is covered in the next section.
 
 # External Code
 
