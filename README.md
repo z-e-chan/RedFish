@@ -38,7 +38,7 @@ RedFish is simple to integrate into your project. Everything you need is in the 
 
 For simplicity, you can just include `src/redfish/redfishapi.h` where ever you need to use RedFish.
 
-The editor's source code lives in 'editor' folder.
+The editor's source code lives in `editor` folder.
 
 Note that RedFish and the editor does include external code which is covered in the next section.
 
@@ -50,7 +50,9 @@ Note that RedFish and the editor does include external code which is covered in 
 
 [FFTConvolver](https://github.com/HiFi-LoFi/FFTConvolver)
 
-If you wish to compile `testbench/redfishdemo.cpp`, you will need `Dear ImGui`.
+Editor:
+
+[nativefiledialog](https://github.com/mlabbe/nativefiledialog)
 
 [Dear ImGui](https://github.com/ocornut/imgui)
 
@@ -118,5 +120,40 @@ rf::Transition* transition = musicSytem->CreateTransition(transParams);
 rf::MusicSystem* musicSystem = context->GetMusicSystem();
 musicSystem->Play(transition);
 ```
+
+**After Deserialization**
+```cpp
+m_context->Deserialize("redfish.json");
+
+// After deserialization, associate our mix group pointers with the mix groups.
+rf::MixerSystem* mixerSystem = m_context->GetMixerSystem();
+rf::MixGroup* mixGroupEntities = mixerSystem->GetMixGroup("Entities");
+rf::MixGroup* mixGroupAmbience = mixerSystem->GetMixGroup("Ambience");
+rf::MixGroup* mixGroupReverb = mixerSystem->GetMixGroup("Reverb");
+rf::MixGroup* mixGroupDelay = mixerSystem->GetMixGroup("Delay");
+rf::MixGroup* mixGroupLeads = mixerSystem->GetMixGroup("Leads");
+rf::MixGroup* mixGroupBass = mixerSystem->GetMixGroup("Bass");
+rf::MixGroup* mixGroupDrums = mixerSystem->GetMixGroup("Drums");
+rf::MixGroup* mixGroupMusic = mixerSystem->GetMixGroup("Music");
+rf::MixGroup* mixGroupSounds = mixerSystem->GetMixGroup("Sounds");
+rf::MixGroup* mixGroupTestSendTo = mixerSystem->GetMixGroup("Send To Test");
+rf::MixGroup* mixGroupMaster = mixerSystem->GetMasterMixGroup();
+
+// After deserialization, associate plugin pointer with plugins.
+rf::IIR2HighpassFilterPlugin* iir2HighpassEntities = m_mixGroupEntities->GetPlugin<rf::IIR2HighpassFilterPlugin>(0);
+rf::IIR2LowpassFilterPlugin* iir2LowpassEntities = m_mixGroupEntities->GetPlugin<rf::IIR2LowpassFilterPlugin>(1);
+rf::CompressorPlugin* compressorEntities = m_mixGroupEntities->GetPlugin<rf::CompressorPlugin>(2);
+rf::PositioningPlugin* positioningEntities = m_mixGroupEntities->GetPlugin<rf::PositioningPlugin>(3);
+rf::GainPlugin* = gainAmbience = m_mixGroupAmbience->GetPlugin<rf::GainPlugin>(0);
+rf::PanPlugin* panAmbience = m_mixGroupAmbience->GetPlugin<rf::PanPlugin>(1);
+rf::ButterworthHighpassFilterPlugin* bwHighpassAmbience = m_mixGroupAmbience->GetPlugin<rf::ButterworthHighpassFilterPlugin>(2);
+rf::ButterworthLowpassFilterPlugin* bwLowpassAmbience = m_mixGroupAmbience->GetPlugin<rf::ButterworthLowpassFilterPlugin>(3);
+rf::DelayPlugin* = delayDelay = m_mixGroupDelay->GetPlugin<rf::DelayPlugin>(0);
+rf::LimiterPlugin* limiterMaster = m_mixGroupMaster->GetPlugin<rf::LimiterPlugin>(0);
+
+// After deserialization, create a convolver. At this time, convolvers do not support serialization.
+rf::ConvolverPlugin* convolverReverb = m_mixGroupReverb->CreatePlugin<rf::ConvolverPlugin>();
+```
+
 # Find a Bug?
 Feel free to report it and/or create an issue. RedFish is being actively developed and my goal is to fix all bugs and add features that make this project more useful.
