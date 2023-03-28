@@ -50,6 +50,8 @@ Note that RedFish and the editor does include external code which is covered in 
 
 [FFTConvolver](https://github.com/HiFi-LoFi/FFTConvolver)
 
+[JSON for Modern C++](https://github.com/nlohmann/json)
+
 Editor:
 
 [nativefiledialog](https://github.com/mlabbe/nativefiledialog)
