@@ -108,7 +108,6 @@ rf::MixGroup* mixGroupSFX = mixerSystem->CreateMixGroup();
 rf::SoundEffect sfx = rf::SoundEffect(context);
 sfx.SetMixGroup(mixGroupSFX);
 sfx.AddVariation(audioHandle);
-
 sfx.Play();
 ```
 
@@ -152,7 +151,6 @@ rf::MixGroup* mixGroupBass = mixerSystem->GetMixGroup("Bass");
 rf::MixGroup* mixGroupDrums = mixerSystem->GetMixGroup("Drums");
 rf::MixGroup* mixGroupMusic = mixerSystem->GetMixGroup("Music");
 rf::MixGroup* mixGroupSounds = mixerSystem->GetMixGroup("Sounds");
-rf::MixGroup* mixGroupTestSendTo = mixerSystem->GetMixGroup("Send To Test");
 rf::MixGroup* mixGroupMaster = mixerSystem->GetMasterMixGroup();
 
 // After deserialization, associate plugin pointer with plugins.
