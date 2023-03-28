@@ -67,8 +67,14 @@ rf::Config config(bufferSize, numChannles, sampleRate, lockAudioDevice, unlockAu
 rf::Context* context = new rf::Context(config);
 rf::AudioCallback* callback = new rf::AudioCallback(m_context);
 
+// If you want to use the editor, allocate one!
+rf::Editor* editor = new rf::Editor(m_context);
+
 // Update rf::Context in your application's update/ticking function.
 context->Update();
+
+// Have an editor? Update it after the context.
+editor->Update();
 
 // Update rf::AudioCallback in your application's audio callback
 // buffer is a float* that RedFish will fill with float samples to play this callback.
@@ -76,11 +82,15 @@ context->Update();
 callback->Update(buffer, bufferSize);
 ```
 
-**Load a WAV File**
+**Load and Unload a Audio Files**
 
 ```cpp
+// Load
 rf::AssetSystem* assetSystem = m_context->GetAssetSystem();
 const rf::AudioHandle audioHandle = assetSystem->Load("../testbench/testdata/a2-tile-land-001.wav");
+
+// Unload
+assetSystem->Unload(audioHandle);
 ```
 
 **Create a Mix Group**
@@ -102,12 +112,16 @@ sfx.Play();
 
 **Working With Music**
 ```cpp
+// Load some audio
+rf::AssetSystem* assetSystem = m_context->GetAssetSystem();
+const rf::AudioHandle audioHandle = assetSystem->Load("BasicSong_Intro.flac");
+
 // Create a music cue
 rf::CueParameters cueParams;
 cueParams.m_meter = rf::Meter(4, 4);
 cueParams.m_tempo = 130.0f;
 cueParams.m_name = "BasicSong_Intro";
-cueParams.AddLayer(audioHandleBasicSongIntro, mixGroupMusic);
+cueParams.AddLayer(audioHandle, mixGroupMusic);
 rf::Cue* cue = musicSytem->CreateCue(cueParams);
 
 // Create a transition to play the cue
