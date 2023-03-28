@@ -140,7 +140,7 @@ musicSystem->Play(transition);
 m_context->Deserialize("redfish.json");
 
 // After deserialization, associate our mix group pointers with the mix groups.
-rf::MixerSystem* mixerSystem = m_context->GetMixerSystem();
+rf::MixerSystem* mixerSystem = context->GetMixerSystem();
 rf::MixGroup* mixGroupEntities = mixerSystem->GetMixGroup("Entities");
 rf::MixGroup* mixGroupAmbience = mixerSystem->GetMixGroup("Ambience");
 rf::MixGroup* mixGroupReverb = mixerSystem->GetMixGroup("Reverb");
@@ -154,16 +154,16 @@ rf::MixGroup* mixGroupTestSendTo = mixerSystem->GetMixGroup("Send To Test");
 rf::MixGroup* mixGroupMaster = mixerSystem->GetMasterMixGroup();
 
 // After deserialization, associate plugin pointer with plugins.
-rf::IIR2HighpassFilterPlugin* iir2HighpassEntities = m_mixGroupEntities->GetPlugin<rf::IIR2HighpassFilterPlugin>(0);
-rf::IIR2LowpassFilterPlugin* iir2LowpassEntities = m_mixGroupEntities->GetPlugin<rf::IIR2LowpassFilterPlugin>(1);
-rf::CompressorPlugin* compressorEntities = m_mixGroupEntities->GetPlugin<rf::CompressorPlugin>(2);
-rf::PositioningPlugin* positioningEntities = m_mixGroupEntities->GetPlugin<rf::PositioningPlugin>(3);
-rf::GainPlugin* = gainAmbience = m_mixGroupAmbience->GetPlugin<rf::GainPlugin>(0);
-rf::PanPlugin* panAmbience = m_mixGroupAmbience->GetPlugin<rf::PanPlugin>(1);
-rf::ButterworthHighpassFilterPlugin* bwHighpassAmbience = m_mixGroupAmbience->GetPlugin<rf::ButterworthHighpassFilterPlugin>(2);
-rf::ButterworthLowpassFilterPlugin* bwLowpassAmbience = m_mixGroupAmbience->GetPlugin<rf::ButterworthLowpassFilterPlugin>(3);
-rf::DelayPlugin* = delayDelay = m_mixGroupDelay->GetPlugin<rf::DelayPlugin>(0);
-rf::LimiterPlugin* limiterMaster = m_mixGroupMaster->GetPlugin<rf::LimiterPlugin>(0);
+rf::IIR2HighpassFilterPlugin* iir2HighpassEntities = mixGroupEntities->GetPlugin<rf::IIR2HighpassFilterPlugin>(0);
+rf::IIR2LowpassFilterPlugin* iir2LowpassEntities = mixGroupEntities->GetPlugin<rf::IIR2LowpassFilterPlugin>(1);
+rf::CompressorPlugin* compressorEntities = mixGroupEntities->GetPlugin<rf::CompressorPlugin>(2);
+rf::PositioningPlugin* positioningEntities = mixGroupEntities->GetPlugin<rf::PositioningPlugin>(3);
+rf::GainPlugin* = gainAmbience = mixGroupAmbience->GetPlugin<rf::GainPlugin>(0);
+rf::PanPlugin* panAmbience = mixGroupAmbience->GetPlugin<rf::PanPlugin>(1);
+rf::ButterworthHighpassFilterPlugin* bwHighpassAmbience = mixGroupAmbience->GetPlugin<rf::ButterworthHighpassFilterPlugin>(2);
+rf::ButterworthLowpassFilterPlugin* bwLowpassAmbience = mixGroupAmbience->GetPlugin<rf::ButterworthLowpassFilterPlugin>(3);
+rf::DelayPlugin* = delayDelay = mixGroupDelay->GetPlugin<rf::DelayPlugin>(0);
+rf::LimiterPlugin* limiterMaster = mixGroupMaster->GetPlugin<rf::LimiterPlugin>(0);
 
 // After deserialization, create a convolver. At this time, convolvers do not support serialization.
 rf::ConvolverPlugin* convolverReverb = m_mixGroupReverb->CreatePlugin<rf::ConvolverPlugin>();
