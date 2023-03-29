@@ -63,7 +63,7 @@ Editor:
 RedFish is simple to use! To see a demonstation of it's usage, take a look at `testbench/redfishdemo.cpp`.
 In the meantime, here is an example of what it is like working the RedFish.
 
-**Create the RedFish Context and Callback**
+**Create the RedFish Context and AudioCallback**
 ```cpp
 
 void LockAudioDevice()
