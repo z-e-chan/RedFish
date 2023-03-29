@@ -84,6 +84,17 @@ const int numChannels = 2;
 const int sampleRate = 48000;
 
 rf::Config config(bufferSize, numChannles, sampleRate, LockAudioDevice, UnlockAudioDevice);
+
+// If you want, you can provide a custom allocator and deallocator.
+config.m_onAllocate = [](size_t numBytes, const char* name, int alignment) {
+    void* data = _aligned_malloc(numBytes, alignment);
+    return data;
+};
+config.m_onDeallocate = [](void* data) {
+    _aligned_free(data);
+};
+
+// Now that the config has been made, create the rf::Context and rf::AudioCallback.
 rf::Context* context = new rf::Context(config);
 rf::AudioCallback* callback = new rf::AudioCallback(m_context);
 
