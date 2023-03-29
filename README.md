@@ -140,7 +140,7 @@ musicSystem->Play(transition);
 ```cpp
 m_context->Deserialize("redfish.json");
 
-// After deserialization, associate our mix group pointers with the mix groups.
+// After deserialization, associate mix groupss with mix group pointers.
 rf::MixerSystem* mixerSystem = context->GetMixerSystem();
 rf::MixGroup* mixGroupEntities = mixerSystem->GetMixGroup("Entities");
 rf::MixGroup* mixGroupAmbience = mixerSystem->GetMixGroup("Ambience");
@@ -153,7 +153,7 @@ rf::MixGroup* mixGroupMusic = mixerSystem->GetMixGroup("Music");
 rf::MixGroup* mixGroupSounds = mixerSystem->GetMixGroup("Sounds");
 rf::MixGroup* mixGroupMaster = mixerSystem->GetMasterMixGroup();
 
-// After deserialization, associate plugin pointer with plugins.
+// After deserialization, associate plugins with plugin pointers.
 rf::IIR2HighpassFilterPlugin* iir2HighpassEntities = mixGroupEntities->GetPlugin<rf::IIR2HighpassFilterPlugin>(0);
 rf::IIR2LowpassFilterPlugin* iir2LowpassEntities = mixGroupEntities->GetPlugin<rf::IIR2LowpassFilterPlugin>(1);
 rf::CompressorPlugin* compressorEntities = mixGroupEntities->GetPlugin<rf::CompressorPlugin>(2);
