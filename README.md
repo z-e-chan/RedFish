@@ -66,9 +66,9 @@ In the meantime, here is an example of what it is like working the RedFish.
 **Create the RedFish Context and AudioCallback**
 ```cpp
 
-// -----------------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------------------
 // Step 1: prepare the rf::Config
-// -----------------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------------------
 
 void LockAudioDevice()
 {
@@ -80,7 +80,7 @@ void UnlockAudioDevice()
     // Implementation specific way of unlocking your audio device.
 }
 
-// The buffer size of the callback. This is the number of audio frames to be processed in an audio callback.
+// The buffer size. This is the number of audio frames to be processed in an audio callback.
 const int bufferSize = 1024;
 // Currently, RedFish only offically supports 2 channels.
 const int numChannels = 2;
@@ -98,9 +98,9 @@ config.m_onDeallocate = [](void* data) {
     _aligned_free(data);
 };
 
-// -----------------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------------------
 // Step 2: Create
-// -----------------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------------------
 
 rf::Context* context = new rf::Context(config);
 rf::AudioCallback* callback = new rf::AudioCallback(context);
@@ -108,9 +108,9 @@ rf::AudioCallback* callback = new rf::AudioCallback(context);
 // If you want to use the editor, allocate one!
 rf::Editor* editor = new rf::Editor(context);
 
-// -----------------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------------------
 // Step 3: Update
-// -----------------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------------------
 
 // Update rf::Context in your application's update/ticking function.
 context->Update();
