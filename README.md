@@ -66,6 +66,10 @@ In the meantime, here is an example of what it is like working the RedFish.
 **Create the RedFish Context and AudioCallback**
 ```cpp
 
+// -----------------------------------------------------------------------------------------------------------
+// Step 1: prepare the rf::Config
+// -----------------------------------------------------------------------------------------------------------
+
 void LockAudioDevice()
 {
     // Implementation specific way of locking your audio device.
@@ -94,12 +98,19 @@ config.m_onDeallocate = [](void* data) {
     _aligned_free(data);
 };
 
-// Now that the config has been made, create the rf::Context and rf::AudioCallback.
+// -----------------------------------------------------------------------------------------------------------
+// Step 2: Create
+// -----------------------------------------------------------------------------------------------------------
+
 rf::Context* context = new rf::Context(config);
-rf::AudioCallback* callback = new rf::AudioCallback(m_context);
+rf::AudioCallback* callback = new rf::AudioCallback(context);
 
 // If you want to use the editor, allocate one!
-rf::Editor* editor = new rf::Editor(m_context);
+rf::Editor* editor = new rf::Editor(context);
+
+// -----------------------------------------------------------------------------------------------------------
+// Step 3: Update
+// -----------------------------------------------------------------------------------------------------------
 
 // Update rf::Context in your application's update/ticking function.
 context->Update();
