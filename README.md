@@ -65,7 +65,25 @@ In the meantime, here is an example of what it is like working the RedFish.
 
 **Create the RedFish Context and Callback**
 ```cpp
-rf::Config config(bufferSize, numChannles, sampleRate, lockAudioDevice, unlockAudioDevice);
+
+void LockAudioDevice()
+{
+    // Implementation specific way of locking your audio device.
+}
+
+void UnlockAudioDevice()
+{
+    // Implementation specific way of unlocking your audio device.
+}
+
+// The buffer size of the callback. This the number of audio frames to be processed in an audio callback.
+const int bufferSize = 1024;
+// Currently, RedFish only offically supports 2 channels.
+const int numChannels = 2;
+// The sample rate of your project.
+const int sampleRate = 48000;
+
+rf::Config config(bufferSize, numChannles, sampleRate, LockAudioDevice, UnlockAudioDevice);
 rf::Context* context = new rf::Context(config);
 rf::AudioCallback* callback = new rf::AudioCallback(m_context);
 
